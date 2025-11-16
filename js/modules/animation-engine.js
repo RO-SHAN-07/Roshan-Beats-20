@@ -29,7 +29,7 @@ class AnimationEngine {
     }
 
     // Main animation loop
-    animate = (currentTime = 0) => {
+    animate(currentTime = 0) {
         if (!this.isRunning) return;
 
         const deltaTime = currentTime - this.lastFrameTime;
@@ -39,7 +39,7 @@ class AnimationEngine {
             this.lastFrameTime = currentTime;
         }
 
-        this.frameId = requestAnimationFrame(this.animate);
+        this.frameId = requestAnimationFrame(this.animate.bind(this));
     }
 
     // Update all active animations

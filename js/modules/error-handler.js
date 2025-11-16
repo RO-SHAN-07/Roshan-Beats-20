@@ -1,6 +1,6 @@
 /**
  * Global error handling and recovery system for Roshan Beats PWA
- * Provides comprehensive error boundary, logging, and recovery mechanisms
+ * Provides comprehensive error boundary, logging, and recovery mechanisms.
  */
 
 import { logger } from './logger.js';
@@ -17,7 +17,7 @@ class ErrorHandler {
   }
 
   /**
-   * Sets up global error event listeners
+   * Sets up global error event listeners.
    */
   setupGlobalHandlers() {
     // Handle unhandled promise rejections
@@ -50,7 +50,7 @@ class ErrorHandler {
   }
 
   /**
-   * Sets up recovery strategies for different error types
+   * Sets up recovery strategies for different error types.
    */
   setupRecoveryStrategies() {
     this.recoveryStrategies.set('network', this.networkRecovery.bind(this));
@@ -61,13 +61,13 @@ class ErrorHandler {
   }
 
   /**
-   * Handles unhandled promise rejections
-   * @param {PromiseRejectionEvent} event - The rejection event
+   * Handles unhandled promise rejections.
+   * @param {PromiseRejectionEvent} event - The rejection event.
    */
   handleUnhandledRejection(event) {
     logger.error('Unhandled promise rejection', event.reason, {
       promise: event.promise,
-      stack: event.reason?.stack
+      stack: event.reason?.stack,
     });
 
     // Prevent default browser handling
@@ -79,15 +79,15 @@ class ErrorHandler {
   }
 
   /**
-   * Handles global JavaScript errors
-   * @param {ErrorEvent} event - The error event
+   * Handles global JavaScript errors.
+   * @param {ErrorEvent} event - The error event.
    */
   handleGlobalError(event) {
     logger.error('Global JavaScript error', event.error, {
       filename: event.filename,
       lineno: event.lineno,
       colno: event.colno,
-      message: event.message
+      message: event.message,
     });
 
     // Don't show error UI for script loading errors in production
@@ -100,16 +100,16 @@ class ErrorHandler {
       stack: event.error?.stack,
       filename: event.filename,
       lineno: event.lineno,
-      colno: event.colno
+      colno: event.colno,
     };
 
     this.handleCriticalError(event.error || new Error(event.message), error);
   }
 
   /**
-   * Handles critical application errors
-   * @param {Error} error - The error object
-   * @param {Object} context - Additional error context
+   * Handles critical application errors.
+   * @param {Error} error - The error object.
+   * @param {object} context - Additional error context.
    */
   handleCriticalError(error, context = {}) {
     const errorId = this.generateErrorId(error, context);
@@ -123,7 +123,7 @@ class ErrorHandler {
       errorCount: errorCount + 1,
       userAgent: navigator.userAgent,
       url: window.location.href,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     // Determine if app can continue
@@ -137,8 +137,8 @@ class ErrorHandler {
   }
 
   /**
-   * Handles service worker errors
-   * @param {Error} error - The service worker error
+   * Handles service worker errors.
+   * @param {Error} error - The service worker error.
    */
   handleServiceWorkerError(error) {
     logger.error('Service Worker error', error);
@@ -148,16 +148,16 @@ class ErrorHandler {
       () => {
         // Attempt to re-register service worker
         if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('/sw.js').catch(regError => {
+          navigator.serviceWorker.register(new URL('/sw.js', import.meta.url)).catch(regError => {
             logger.error('Failed to re-register service worker', regError);
           });
         }
-      }
+      },
     );
   }
 
   /**
-   * Handles network connectivity changes
+   * Handles network connectivity changes.
    */
   handleNetworkError() {
     logger.warn('Network connection lost');
@@ -165,7 +165,7 @@ class ErrorHandler {
   }
 
   /**
-   * Handles network recovery
+   * Handles network recovery.
    */
   handleNetworkRecovery() {
     logger.info('Network connection restored');
@@ -176,12 +176,14 @@ class ErrorHandler {
   }
 
   /**
-   * Classifies errors by type for appropriate recovery strategies
-   * @param {Error} error - The error to classify
-   * @returns {string} - The error classification
+   * Classifies errors by type for appropriate recovery strategies.
+   * @param {Error} error - The error to classify.
+   * @returns {string} - The error classification.
    */
   classifyError(error) {
-    if (!error) return 'unknown';
+    if (!error) {
+      return 'unknown';
+    }
 
     const message = error.message?.toLowerCase() || '';
     const name = error.name?.toLowerCase() || '';
@@ -206,13 +208,15 @@ class ErrorHandler {
   }
 
   /**
-   * Determines if an error is recoverable
-   * @param {Error} error - The error object
-   * @param {Object} context - Error context
-   * @returns {boolean} - Whether the error is recoverable
+   * Determines if an error is recoverable.
+   * @param {Error} error - The error object.
+   * @param {object} context - Error context.
+   * @returns {boolean} - Whether the error is recoverable.
    */
   isErrorRecoverable(error, context) {
-    if (!error) return true;
+    if (!error) {
+      return true;
+    }
 
     const recoverablePatterns = [
       /network/i,
@@ -220,7 +224,7 @@ class ErrorHandler {
       /temporary/i,
       /unavailable/i,
       /suspended/i,
-      /interrupted/i
+      /interrupted/i,
     ];
 
     const errorString = `${error.message || ''} ${error.name || ''} ${context.filename || ''}`.toLowerCase();
@@ -229,9 +233,9 @@ class ErrorHandler {
   }
 
   /**
-   * Attempts to recover from an error using appropriate strategy
-   * @param {string} recoveryType - The type of recovery to attempt
-   * @param {Object} data - Recovery context data
+   * Attempts to recover from an error using appropriate strategy.
+   * @param {string} recoveryType - The type of recovery to attempt.
+   * @param {object} data - Recovery context data.
    */
   async attemptRecovery(recoveryType, data = {}) {
     const strategy = this.recoveryStrategies.get(recoveryType);
@@ -252,8 +256,8 @@ class ErrorHandler {
   }
 
   /**
-   * Network error recovery strategy
-   * @param {Object} data - Recovery context
+   * Network error recovery strategy.
+   * @param {object} data - Recovery context.
    */
   async networkRecovery(data) {
     if (navigator.onLine) {
@@ -268,8 +272,8 @@ class ErrorHandler {
   }
 
   /**
-   * Audio context recovery strategy
-   * @param {Object} data - Recovery context
+   * Audio context recovery strategy.
+   * @param {object} data - Recovery context.
    */
   async audioRecovery(data) {
     // Reinitialize audio context
@@ -290,8 +294,8 @@ class ErrorHandler {
   }
 
   /**
-   * Storage error recovery strategy
-   * @param {Object} data - Recovery context
+   * Storage error recovery strategy.
+   * @param {object} data - Recovery context.
    */
   async storageRecovery(data) {
     // Clear corrupted cache and reinitialize storage
@@ -299,7 +303,7 @@ class ErrorHandler {
       if ('caches' in window) {
         const cacheNames = await caches.keys();
         await Promise.all(
-          cacheNames.map(name => caches.delete(name))
+          cacheNames.map(name => caches.delete(name)),
         );
       }
 
@@ -317,8 +321,8 @@ class ErrorHandler {
   }
 
   /**
-   * Permission error recovery strategy
-   * @param {Object} data - Recovery context
+   * Permission error recovery strategy.
+   * @param {object} data - Recovery context.
    */
   async permissionRecovery(data) {
     // Guide user to grant permissions
@@ -327,8 +331,8 @@ class ErrorHandler {
   }
 
   /**
-   * Critical error recovery strategy
-   * @param {Object} data - Recovery context
+   * Critical error recovery strategy.
+   * @param {object} data - Recovery context.
    */
   async criticalRecovery(data) {
     // Try to reinitialize core systems
@@ -350,16 +354,16 @@ class ErrorHandler {
   }
 
   /**
-   * Queues an error for later retry
-   * @param {string} recoveryType - The recovery type
-   * @param {Object} data - Error context data
+   * Queues an error for later retry.
+   * @param {string} recoveryType - The recovery type.
+   * @param {object} data - Error context data.
    */
   queueErrorForRetry(recoveryType, data) {
     this.errorQueue.push({
       type: recoveryType,
       data,
       timestamp: Date.now(),
-      retryCount: 0
+      retryCount: 0,
     });
 
     // Process queue when conditions improve
@@ -369,12 +373,12 @@ class ErrorHandler {
   }
 
   /**
-   * Processes queued errors for retry
+   * Processes queued errors for retry.
    */
   async processErrorQueue() {
     const now = Date.now();
     const toProcess = this.errorQueue.filter(item =>
-      now - item.timestamp > 30000 // Wait 30 seconds before retry
+      now - item.timestamp > 30000, // Wait 30 seconds before retry
     );
 
     for (const item of toProcess) {
@@ -389,9 +393,9 @@ class ErrorHandler {
   }
 
   /**
-   * Shows critical error screen when recovery fails
-   * @param {Error} error - The error that caused the critical failure
-   * @param {Object} context - Error context
+   * Shows critical error screen when recovery fails.
+   * @param {Error} error - The error that caused the critical failure.
+   * @param {object} context - Error context.
    */
   showCriticalErrorScreen(error, context) {
     const errorScreen = document.createElement('div');
@@ -435,22 +439,22 @@ class ErrorHandler {
   }
 
   /**
-   * Reports an error for debugging
-   * @param {Error} error - The error to report
-   * @param {Object} context - Error context
+   * Reports an error for debugging.
+   * @param {Error} error - The error to report.
+   * @param {object} context - Error context.
    */
   reportError(error, context) {
     const report = {
       error: {
         message: error?.message,
         stack: error?.stack,
-        name: error?.name
+        name: error?.name,
       },
       context,
       userAgent: navigator.userAgent,
       url: window.location.href,
       timestamp: new Date().toISOString(),
-      logs: logger.getLogs ? logger.getLogs('error', 10) : []
+      logs: logger.getLogs ? logger.getLogs('error', 10) : [],
     };
 
     // Copy to clipboard or send to service
@@ -464,26 +468,26 @@ class ErrorHandler {
   }
 
   /**
-   * Generates a unique error ID for tracking
-   * @param {Error} error - The error object
-   * @param {Object} context - Error context
-   * @returns {string} - Unique error identifier
+   * Generates a unique error ID for tracking.
+   * @param {Error} error - The error object.
+   * @param {object} context - Error context.
+   * @returns {string} - Unique error identifier.
    */
   generateErrorId(error, context) {
     const components = [
       error?.name || 'Unknown',
       error?.message?.substring(0, 50) || 'No message',
       context?.filename || 'unknown',
-      context?.lineno || '0'
+      context?.lineno || '0',
     ];
     return btoa(components.join('|')).replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
   }
 
   /**
-   * Logs performance metrics for error analysis
-   * @param {string} operation - The operation being measured
-   * @param {number} duration - Duration in milliseconds
-   * @param {boolean} success - Whether the operation succeeded
+   * Logs performance metrics for error analysis.
+   * @param {string} operation - The operation being measured.
+   * @param {number} duration - Duration in milliseconds.
+   * @param {boolean} success - Whether the operation succeeded.
    */
   logPerformanceMetric(operation, duration, success) {
     logger.debug('Performance metric', {
@@ -493,8 +497,8 @@ class ErrorHandler {
       memory: performance.memory ? {
         used: performance.memory.usedJSHeapSize,
         total: performance.memory.totalJSHeapSize,
-        limit: performance.memory.jsHeapSizeLimit
-      } : null
+        limit: performance.memory.jsHeapSizeLimit,
+      } : null,
     });
   }
 }
@@ -510,7 +514,7 @@ export function withErrorBoundary(fn, fallbackMessage = 'An error occurred') {
     } catch (error) {
       errorHandler.handleCriticalError(error, {
         component: fn.name,
-        args: args.map(arg => typeof arg === 'object' ? '[object]' : arg)
+        args: args.map(arg => typeof arg === 'object' ? '[object]' : arg),
       });
       uiManager.showErrorMessage(fallbackMessage);
       return null;

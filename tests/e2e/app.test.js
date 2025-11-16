@@ -7,7 +7,7 @@ describe('Roshan Beats PWA E2E Tests', () => {
   beforeAll(async () => {
     browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
   });
 
@@ -26,7 +26,7 @@ describe('Roshan Beats PWA E2E Tests', () => {
         request.respond({
           status: 200,
           contentType: 'application/javascript',
-          body: 'console.log("Mock Service Worker");'
+          body: 'console.log("Mock Service Worker");',
         });
       } else {
         request.continue();

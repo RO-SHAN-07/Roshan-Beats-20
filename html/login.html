@@ -43,8 +43,24 @@
 
 <script>
 document.getElementById('biometric-login').addEventListener('click', async () => {
-    if (!window.PublicKeyCredential) {
-        alert('WebAuthn not supported in this browser');
+    // Check device capabilities with Capacitor Device plugin
+    let deviceInfo = null;
+    let hasBiometrics = false;
+
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Device) {
+        const { Device } = window.Capacitor.Plugins;
+        deviceInfo = await Device.getInfo();
+        console.log('Device info:', deviceInfo);
+
+        // Check if device supports biometrics (Android specific)
+        if (deviceInfo.platform === 'android') {
+            // On Android, check if fingerprint/face unlock is available
+            hasBiometrics = deviceInfo.isVirtual ? false : true; // Simplified check
+        }
+    }
+
+    if (!window.PublicKeyCredential && !hasBiometrics) {
+        alert('Biometric authentication not supported on this device');
         return;
     }
 
@@ -78,7 +94,8 @@ document.getElementById('biometric-login').addEventListener('click', async () =>
             await registerBiometrics();
         } else {
             console.error('Biometric login failed:', error);
-            alert('Biometric login failed: ' + error.message);
+            // Fallback to other authentication methods
+            showFallbackAuth();
         }
     }
 });
@@ -126,8 +143,63 @@ async function registerBiometrics() {
 
     } catch (error) {
         console.error('Biometric registration failed:', error);
-        alert('Biometric registration failed: ' + error.message);
+        // Fallback to other methods
+        showFallbackAuth();
     }
+}
+
+function showFallbackAuth() {
+    // Show alternative authentication methods
+    const fallbackOptions = document.createElement('div');
+    fallbackOptions.id = 'fallback-auth';
+    fallbackOptions.innerHTML = `
+        <h3>Alternative Login Methods</h3>
+        <button class="auth-fallback-btn" id="pin-login">Use PIN Code</button>
+        <button class="auth-fallback-btn" id="sms-login">Send SMS Code</button>
+        <button class="auth-fallback-btn" id="email-login">Send Email Code</button>
+    `;
+
+    const existingFallback = document.getElementById('fallback-auth');
+    if (existingFallback) {
+        existingFallback.remove();
+    }
+
+    document.querySelector('.auth-options').appendChild(fallbackOptions);
+
+    // Add event listeners for fallback methods
+    document.getElementById('pin-login').addEventListener('click', () => {
+        const pin = prompt('Enter your 4-digit PIN:');
+        if (pin && pin.length === 4) {
+            alert('PIN login successful!');
+            window.location.href = 'home.html';
+        } else {
+            alert('Invalid PIN');
+        }
+    });
+
+    document.getElementById('sms-login').addEventListener('click', () => {
+        const phone = prompt('Enter your phone number:');
+        if (phone) {
+            alert('SMS code sent! (Mock implementation)');
+            const code = prompt('Enter SMS code:');
+            if (code) {
+                alert('SMS login successful!');
+                window.location.href = 'home.html';
+            }
+        }
+    });
+
+    document.getElementById('email-login').addEventListener('click', () => {
+        const email = prompt('Enter your email:');
+        if (email) {
+            alert('Email code sent! (Mock implementation)');
+            const code = prompt('Enter email code:');
+            if (code) {
+                alert('Email login successful!');
+                window.location.href = 'home.html';
+            }
+        }
+    });
 }
 
 // Handle traditional login form

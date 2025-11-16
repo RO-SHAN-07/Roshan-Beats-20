@@ -3,7 +3,7 @@
 
 let recognition = null;
 let isListening = false;
-let eventListeners = {};
+const eventListeners = {};
 
 function emit(event, data) {
   if (eventListeners[event]) {
@@ -22,7 +22,9 @@ export function startListening() {
     return;
   }
 
-  if (isListening) return;
+  if (isListening) {
+    return;
+  }
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SpeechRecognition();

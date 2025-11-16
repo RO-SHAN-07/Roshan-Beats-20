@@ -4,7 +4,7 @@ describe('Search Manager', () => {
   const mockSongs = [
     { id: 1, title: 'Song One', artist: 'Artist A', album: 'Album X', genre: 'Rock' },
     { id: 2, title: 'Song Two', artist: 'Artist B', album: 'Album Y', genre: 'Pop' },
-    { id: 3, title: 'Another Song', artist: 'Artist A', album: 'Album Z', genre: 'Jazz' }
+    { id: 3, title: 'Another Song', artist: 'Artist A', album: 'Album Z', genre: 'Jazz' },
   ];
 
   beforeEach(() => {

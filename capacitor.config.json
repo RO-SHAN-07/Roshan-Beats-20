@@ -1,0 +1,26 @@
+{
+  "appId": "com.roshanbeats.app",
+  "appName": "Roshan Beats",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "@capacitor/camera": {},
+    "@capacitor/geolocation": {},
+    "@capacitor/push-notifications": {},
+    "@capacitor/biometric": {},
+    "@capacitor/filesystem": {}
+  },
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#ffffff",
+    "orientation": "portrait",
+    "splashScreen": {
+      "launchShowDuration": 3000,
+      "launchAutoHide": true,
+      "backgroundColor": "#ffffff",
+      "androidSplashResourceName": "splash"
+    }
+  }
+}

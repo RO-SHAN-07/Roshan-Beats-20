@@ -44,7 +44,7 @@ async function minifyHTML() {
       removeStyleLinkTypeAttributes: true,
       useShortDoctype: true,
       minifyCSS: true,
-      minifyJS: true
+      minifyJS: true,
     });
 
     fs.writeFileSync(file, minified);
@@ -136,19 +136,19 @@ async function generateCompressionManifest() {
       html: 'Minified with html-minifier-terser',
       css: 'Minified with csso',
       images: 'Converted to WebP, responsive sizes generated',
-      js: 'Minified by Parcel/Terser'
+      js: 'Minified by Parcel/Terser',
     },
     recommendations: [
       'Enable gzip/brotli compression on server',
       'Set appropriate cache headers',
       'Use CDN for static assets',
-      'Enable HTTP/2 server push for critical resources'
-    ]
+      'Enable HTTP/2 server push for critical resources',
+    ],
   };
 
   fs.writeFileSync(
     path.join(distDir, 'optimization-manifest.json'),
-    JSON.stringify(manifest, null, 2)
+    JSON.stringify(manifest, null, 2),
   );
 
   console.log('  ✓ Generated optimization manifest');

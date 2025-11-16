@@ -1,0 +1,15 @@
+{
+  "generated": "2025-11-16T11:51:38.130Z",
+  "optimizations": {
+    "html": "Minified with html-minifier-terser",
+    "css": "Minified with csso",
+    "images": "Converted to WebP, responsive sizes generated",
+    "js": "Minified by Parcel/Terser"
+  },
+  "recommendations": [
+    "Enable gzip/brotli compression on server",
+    "Set appropriate cache headers",
+    "Use CDN for static assets",
+    "Enable HTTP/2 server push for critical resources"
+  ]
+}

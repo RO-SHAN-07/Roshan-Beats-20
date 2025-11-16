@@ -23,7 +23,7 @@ describe('Audio Module', () => {
 
     it('should load song from url', async () => {
       global.fetch.mockResolvedValue({
-        arrayBuffer: jest.fn(() => Promise.resolve(new ArrayBuffer(8)))
+        arrayBuffer: jest.fn(() => Promise.resolve(new ArrayBuffer(8))),
       });
       await expect(loadSong('url')).resolves.toBeUndefined();
     });

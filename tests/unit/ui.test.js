@@ -28,8 +28,8 @@ describe('UI Manager', () => {
         classList: {
           add: jest.fn(),
           remove: jest.fn(),
-          contains: jest.fn()
-        }
+          contains: jest.fn(),
+        },
       };
       return el;
     });

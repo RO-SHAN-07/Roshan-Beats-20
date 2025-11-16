@@ -1,8 +1,12 @@
-const express = require('express');
-const helmet = require('helmet');
-const cors = require('cors');
-const RateLimit = require('rate-limiter-flexible');
-const path = require('path');
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import RateLimit from 'rate-limiter-flexible';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,28 +15,28 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      imgSrc: ["'self'", "data:", "https:", "blob:"],
-      mediaSrc: ["'self'", "blob:", "data:"],
-      connectSrc: ["'self'", "https:"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      objectSrc: ["'none'"],
-      baseUri: ["'self'"],
-      formAction: ["'self'"],
-      frameAncestors: ["'none'"],
+      defaultSrc: ['\'self\''],
+      scriptSrc: ['\'self\'', '\'unsafe-inline\'', 'https://cdn.jsdelivr.net'],
+      styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
+      imgSrc: ['\'self\'', 'data:', 'https:', 'blob:'],
+      mediaSrc: ['\'self\'', 'blob:', 'data:'],
+      connectSrc: ['\'self\'', 'https:'],
+      fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
+      objectSrc: ['\'none\''],
+      baseUri: ['\'self\''],
+      formAction: ['\'self\''],
+      frameAncestors: ['\'none\''],
       upgradeInsecureRequests: [],
     },
   },
   hsts: {
     maxAge: 31536000,
     includeSubDomains: true,
-    preload: true
+    preload: true,
   },
   noSniff: true,
   xssFilter: true,
-  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }));
 
 // CORS configuration
@@ -40,7 +44,7 @@ app.use(cors({
   origin: process.env.NODE_ENV === 'production' ? false : true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 
 // Rate limiting
@@ -71,7 +75,7 @@ app.use(express.static(path.join(__dirname, 'dist'), {
     if (path.endsWith('.html')) {
       res.setHeader('Cache-Control', 'no-cache');
     }
-  }
+  },
 }));
 
 // API routes with additional security
@@ -80,7 +84,7 @@ app.use('/api', (req, res, next) => {
   res.set({
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
-    'X-XSS-Protection': '1; mode=block'
+    'X-XSS-Protection': '1; mode=block',
   });
   next();
 });
@@ -90,7 +94,7 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
   });
 });
 
@@ -116,7 +120,7 @@ app.use((err, req, res, next) => {
   console.error('Server error:', err);
   res.status(500).json({
     error: 'Internal Server Error',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong',
   });
 });
 
@@ -141,4 +145,4 @@ app.listen(PORT, () => {
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
-module.exports = app;
+export default app;

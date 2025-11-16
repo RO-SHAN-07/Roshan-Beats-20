@@ -4,7 +4,7 @@ import { searchManager } from '../../js/modules/search.js';
 describe('Search-UI Integration', () => {
   const mockSongs = [
     { id: 1, title: 'Rock Song', artist: 'Rock Artist', genre: 'Rock' },
-    { id: 2, title: 'Pop Song', artist: 'Pop Artist', genre: 'Pop' }
+    { id: 2, title: 'Pop Song', artist: 'Pop Artist', genre: 'Pop' },
   ];
 
   beforeEach(() => {
@@ -20,7 +20,7 @@ describe('Search-UI Integration', () => {
     document.createElement = jest.fn(() => ({
       innerHTML: '',
       appendChild: jest.fn(),
-      classList: { add: jest.fn(), remove: jest.fn() }
+      classList: { add: jest.fn(), remove: jest.fn() },
     }));
 
     // Mock search manager
@@ -42,7 +42,7 @@ describe('Search-UI Integration', () => {
       expect(searchManager.searchSongs).toHaveBeenCalledWith('Rock', {
         genre: '',
         artist: '',
-        album: ''
+        album: '',
       });
     });
 
@@ -78,7 +78,7 @@ describe('Search-UI Integration', () => {
       expect(searchManager.searchSongs).toHaveBeenCalledWith('Song', {
         genre: 'Rock',
         artist: '',
-        album: ''
+        album: '',
       });
     });
   });

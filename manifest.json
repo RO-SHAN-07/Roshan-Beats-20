@@ -11,20 +11,6 @@
   "lang": "en",
   "dir": "ltr",
   "categories": ["music", "entertainment", "productivity"],
-  "screenshots": [
-    {
-      "src": "assets/images/screenshot-mobile.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "assets/images/screenshot-tablet.png",
-      "sizes": "1280x800",
-      "type": "image/png",
-      "form_factor": "wide"
-    }
-  ],
   "icons": [
     {
       "src": "assets/icons/icon-72.png",

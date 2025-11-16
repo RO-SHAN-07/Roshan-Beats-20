@@ -22,7 +22,7 @@ const urlsToCache = [
   '/assets/icons/prev.png',
   // Default images
   '/assets/images/default-cover.png',
-  '/assets/images/default-playlist.png'
+  '/assets/images/default-playlist.png',
 ];
 
 // Additional resources to precache
@@ -33,7 +33,7 @@ const additionalUrlsToCache = [
   '/js/modules/ui.js',
   '/js/modules/storage.js',
   '/js/modules/performance.js',
-  '/js/modules/resource-hints.js'
+  '/js/modules/resource-hints.js',
 ];
 
 // Cache-first strategy for static assets
@@ -151,7 +151,7 @@ async function queueFailedRequest(requestData) {
         method: requestData.method || 'GET',
         headers: requestData.headers || {},
         body: requestData.body || null,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
@@ -201,7 +201,7 @@ async function retryQueuedRequests() {
       const response = await fetch(queued.url, {
         method: queued.method,
         headers: queued.headers,
-        body: queued.body
+        body: queued.body,
       });
       if (response.ok) {
         await removeQueuedRequest(queued.id);
@@ -232,7 +232,7 @@ const networkFirst = async (request, cacheName = DYNAMIC_CACHE) => {
         url: request.url,
         method: request.method,
         headers: Object.fromEntries(request.headers.entries()),
-        body: request.body ? await request.clone().text() : null
+        body: request.body ? await request.clone().text() : null,
       });
     }
     const cachedResponse = await caches.match(request);
@@ -320,11 +320,11 @@ self.addEventListener('install', event => {
             '/assets/images/default-cover.png',
             '/assets/images/default-playlist.png',
             '/assets/icons/play.png',
-            '/assets/icons/pause.png'
+            '/assets/icons/pause.png',
           ];
           return cache.addAll(imageUrls);
-        })
-    ])
+        }),
+    ]),
   );
 
   self.skipWaiting();
@@ -345,7 +345,7 @@ self.addEventListener('activate', event => {
               console.log('Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
-          })
+          }),
         );
       }),
 
@@ -353,8 +353,8 @@ self.addEventListener('activate', event => {
       manageCacheSize(),
 
       // Claim clients immediately
-      self.clients.claim()
-    ])
+      self.clients.claim(),
+    ]),
   );
 });
 
@@ -363,7 +363,7 @@ async function manageCacheSize() {
   const maxCacheSize = {
     [DYNAMIC_CACHE]: 50 * 1024 * 1024, // 50MB for dynamic content
     [AUDIO_CACHE]: 500 * 1024 * 1024,  // 500MB for audio
-    [IMAGE_CACHE]: 100 * 1024 * 1024   // 100MB for images
+    [IMAGE_CACHE]: 100 * 1024 * 1024,   // 100MB for images
   };
 
   for (const [cacheName, maxSize] of Object.entries(maxCacheSize)) {
@@ -486,22 +486,22 @@ self.addEventListener('push', event => {
     badge: '/assets/icons/icon-96.png',
     vibrate: [200, 100, 200],
     data: {
-      url: data.url || '/'
+      url: data.url || '/',
     },
     actions: [
       {
         action: 'view',
-        title: 'View'
+        title: 'View',
       },
       {
         action: 'dismiss',
-        title: 'Dismiss'
-      }
-    ]
+        title: 'Dismiss',
+      },
+    ],
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Roshan Beats', options)
+    self.registration.showNotification(data.title || 'Roshan Beats', options),
   );
 });
 
@@ -520,7 +520,7 @@ self.addEventListener('notificationclick', event => {
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
       // Check if there is already a window/tab open with the target URL
-      for (let client of windowClients) {
+      for (const client of windowClients) {
         if (client.url === urlToOpen && 'focus' in client) {
           return client.focus();
         }
@@ -529,7 +529,7 @@ self.addEventListener('notificationclick', event => {
       if (clients.openWindow) {
         return clients.openWindow(urlToOpen);
       }
-    })
+    }),
   );
 });
 

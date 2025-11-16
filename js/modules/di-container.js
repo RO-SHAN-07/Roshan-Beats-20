@@ -1,6 +1,6 @@
 /**
  * Simple Dependency Injection Container for Roshan Beats PWA
- * Provides loose coupling and better testability
+ * Provides loose coupling and better testability.
  */
 
 class DIContainer {
@@ -11,45 +11,45 @@ class DIContainer {
   }
 
   /**
-   * Registers a service with the container
-   * @param {string} name - Service name
-   * @param {Function|Object} service - Service class or instance
-   * @param {Array} dependencies - Array of dependency names
+   * Registers a service with the container.
+   * @param {string} name - Service name.
+   * @param {Function | object} service - Service class or instance.
+   * @param {Array} dependencies - Array of dependency names.
    */
   register(name, service, dependencies = []) {
     this.services.set(name, {
       service,
       dependencies,
-      singleton: true
+      singleton: true,
     });
   }
 
   /**
-   * Registers a factory function
-   * @param {string} name - Factory name
-   * @param {Function} factory - Factory function
-   * @param {Array} dependencies - Array of dependency names
+   * Registers a factory function.
+   * @param {string} name - Factory name.
+   * @param {Function} factory - Factory function.
+   * @param {Array} dependencies - Array of dependency names.
    */
   registerFactory(name, factory, dependencies = []) {
     this.factories.set(name, {
       factory,
-      dependencies
+      dependencies,
     });
   }
 
   /**
-   * Registers a singleton instance
-   * @param {string} name - Service name
-   * @param {Object} instance - Service instance
+   * Registers a singleton instance.
+   * @param {string} name - Service name.
+   * @param {object} instance - Service instance.
    */
   registerInstance(name, instance) {
     this.instances.set(name, instance);
   }
 
   /**
-   * Resolves a service by name
-   * @param {string} name - Service name
-   * @returns {*} - Resolved service
+   * Resolves a service by name.
+   * @param {string} name - Service name.
+   * @returns {*} - Resolved service.
    */
   resolve(name) {
     // Check if it's already instantiated
@@ -88,16 +88,16 @@ class DIContainer {
   }
 
   /**
-   * Checks if a service is registered
-   * @param {string} name - Service name
-   * @returns {boolean} - Whether the service is registered
+   * Checks if a service is registered.
+   * @param {string} name - Service name.
+   * @returns {boolean} - Whether the service is registered.
    */
   has(name) {
     return this.services.has(name) || this.factories.has(name) || this.instances.has(name);
   }
 
   /**
-   * Clears all registered services
+   * Clears all registered services.
    */
   clear() {
     this.services.clear();

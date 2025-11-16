@@ -15,7 +15,9 @@ if (!Promise.prototype.finally) {
     const P = this.constructor;
     return this.then(
       value => P.resolve(callback()).then(() => value),
-      reason => P.resolve(callback()).then(() => { throw reason; })
+      reason => P.resolve(callback()).then(() => {
+        throw reason;
+      }),
     );
   };
 }
@@ -71,7 +73,7 @@ if (!Array.prototype.includes) {
         k++;
       }
       return false;
-    }
+    },
   });
 }
 
@@ -100,7 +102,9 @@ if (!Element.prototype.closest) {
   Element.prototype.closest = function(s) {
     let el = this;
     do {
-      if (Element.prototype.matches.call(el, s)) return el;
+      if (Element.prototype.matches.call(el, s)) {
+        return el;
+      }
       el = el.parentElement || el.parentNode;
     } while (el !== null && el.nodeType === 1);
     return null;
@@ -232,7 +236,7 @@ if (typeof window !== 'undefined' && !navigator.serviceWorker) {
     ready: Promise.reject(new Error('Service Worker not supported')),
     controller: null,
     oncontrollerchange: null,
-    onmessage: null
+    onmessage: null,
   };
 }
 
@@ -249,16 +253,20 @@ if (typeof window !== 'undefined' && !window.Notification) {
 if (typeof window !== 'undefined' && !navigator.geolocation) {
   navigator.geolocation = {
     getCurrentPosition: (success, error) => {
-      if (error) error({ code: 2, message: 'Geolocation not supported' });
+      if (error) {
+        error({ code: 2, message: 'Geolocation not supported' });
+      }
     },
     watchPosition: () => -1,
-    clearWatch: () => {}
+    clearWatch: () => {},
   };
 }
 
 // Vibration API polyfill
 if (typeof window !== 'undefined' && !navigator.vibrate) {
-  navigator.vibrate = function() { return false; };
+  navigator.vibrate = function() {
+    return false;
+  };
 }
 
 // Battery API polyfill
@@ -277,7 +285,7 @@ if (typeof window !== 'undefined' && !navigator.mediaSession) {
     metadata: null,
     playbackState: 'none',
     setActionHandler: () => {},
-    setPositionState: () => {}
+    setPositionState: () => {},
   };
 }
 

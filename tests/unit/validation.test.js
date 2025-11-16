@@ -1,5 +1,5 @@
 /**
- * Unit tests for input validation and sanitization utilities
+ * Unit tests for input validation and sanitization utilities.
  */
 
 import {
@@ -13,7 +13,7 @@ import {
   validateDate,
   validateForm,
   escapeHtml,
-  validateUrl
+  validateUrl,
 } from '../../js/modules/validation.js';
 
 describe('Input Validation Module', () => {
@@ -217,13 +217,13 @@ describe('Input Validation Module', () => {
       const formData = {
         email: 'test@example.com',
         username: 'testuser',
-        password: 'StrongPass123!'
+        password: 'StrongPass123!',
       };
 
       const rules = {
         email: { type: 'email' },
         username: { type: 'username' },
-        password: { type: 'password' }
+        password: { type: 'password' },
       };
 
       const result = validateForm(formData, rules);
@@ -235,13 +235,13 @@ describe('Input Validation Module', () => {
       const formData = {
         email: 'invalid-email',
         username: 'ab',
-        password: 'weak'
+        password: 'weak',
       };
 
       const rules = {
         email: { type: 'email' },
         username: { type: 'username' },
-        password: { type: 'password' }
+        password: { type: 'password' },
       };
 
       const result = validateForm(formData, rules);

@@ -11,7 +11,7 @@ describe('Storage Module', () => {
       result: {
         objectStoreNames: { contains: jest.fn(() => true) },
         createObjectStore: jest.fn(() => ({
-          createIndex: jest.fn()
+          createIndex: jest.fn(),
         })),
         transaction: jest.fn(() => ({
           objectStore: jest.fn(() => ({
@@ -22,12 +22,12 @@ describe('Storage Module', () => {
             clear: jest.fn(() => ({ onsuccess: null, onerror: null })),
             openCursor: jest.fn(() => ({ onsuccess: null, onerror: null, result: null })),
             index: jest.fn(() => ({
-              getAll: jest.fn(() => ({ onsuccess: null, onerror: null, result: [] }))
+              getAll: jest.fn(() => ({ onsuccess: null, onerror: null, result: [] })),
             })),
-            add: jest.fn(() => ({ onsuccess: null, onerror: null, result: 1 }))
-          }))
-        }))
-      }
+            add: jest.fn(() => ({ onsuccess: null, onerror: null, result: 1 })),
+          })),
+        })),
+      },
     });
   });
 
@@ -147,7 +147,7 @@ describe('Storage Module', () => {
   describe('fetchAlbumArt', () => {
     it('should fetch album art', async () => {
       global.fetch.mockResolvedValue({
-        json: jest.fn(() => ({ album: { image: [{ '#text': 'url' }] } }))
+        json: jest.fn(() => ({ album: { image: [{ '#text': 'url' }] } })),
       });
       const url = await fetchAlbumArt('Album', 'Artist');
       expect(typeof url).toBe('string');

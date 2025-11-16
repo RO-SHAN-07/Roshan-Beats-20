@@ -24,7 +24,7 @@ describe('UI-Storage Integration', () => {
       appendChild: jest.fn(),
       insertAdjacentHTML: jest.fn(),
       querySelectorAll: jest.fn(() => []),
-      classList: { add: jest.fn(), remove: jest.fn() }
+      classList: { add: jest.fn(), remove: jest.fn() },
     }));
 
     // Mock indexedDB
@@ -36,10 +36,10 @@ describe('UI-Storage Integration', () => {
           objectStore: jest.fn(() => ({
             put: jest.fn(() => ({ onsuccess: null, result: 1 })),
             getAll: jest.fn(() => ({ onsuccess: null, result: [] })),
-            add: jest.fn(() => ({ onsuccess: null, result: 1 }))
-          }))
-        }))
-      }
+            add: jest.fn(() => ({ onsuccess: null, result: 1 })),
+          })),
+        })),
+      },
     });
   });
 
@@ -47,7 +47,7 @@ describe('UI-Storage Integration', () => {
     it('should populate song library from storage', async () => {
       const mockSongs = [
         { id: 1, title: 'Song 1', artist: 'Artist 1' },
-        { id: 2, title: 'Song 2', artist: 'Artist 2' }
+        { id: 2, title: 'Song 2', artist: 'Artist 2' },
       ];
 
       // Mock getSongs to return songs
@@ -63,7 +63,7 @@ describe('UI-Storage Integration', () => {
   describe('Playlist Management', () => {
     it('should create and display playlists', async () => {
       const mockPlaylists = [
-        { id: 1, name: 'Playlist 1', songs: [] }
+        { id: 1, name: 'Playlist 1', songs: [] },
       ];
 
       getPlaylists.mockResolvedValue(mockPlaylists);

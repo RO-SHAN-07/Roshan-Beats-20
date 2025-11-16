@@ -17,7 +17,7 @@ describe('Offline Module', () => {
       // Mock service worker registration
       const mockPostMessage = jest.fn();
       global.navigator.serviceWorker.register.mockResolvedValue({
-        active: { postMessage: mockPostMessage }
+        active: { postMessage: mockPostMessage },
       });
 
       registerSW();
@@ -39,7 +39,7 @@ describe('Offline Module', () => {
       // Mock service worker with sync
       const mockSync = { register: jest.fn() };
       global.navigator.serviceWorker.register.mockResolvedValue({
-        sync: mockSync
+        sync: mockSync,
       });
 
       registerSW();

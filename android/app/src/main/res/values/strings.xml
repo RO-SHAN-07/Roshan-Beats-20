@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Roshan Beats</string>
+    <string name="title_activity_main">Roshan Beats</string>
+    <string name="package_name">com.roshanbeats.app</string>
+    <string name="custom_url_scheme">com.roshanbeats.app</string>
+</resources>

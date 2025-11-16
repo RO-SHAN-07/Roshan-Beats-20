@@ -1,6 +1,6 @@
 /**
  * Network Detection Utilities
- * Detects network conditions for adaptive loading and caching
+ * Detects network conditions for adaptive loading and caching.
  */
 
 class NetworkDetector {
@@ -9,7 +9,7 @@ class NetworkDetector {
       effectiveType: '4g', // default
       downlink: 10, // Mbps
       rtt: 50, // ms
-      saveData: false
+      saveData: false,
     };
     this.speedTestResults = null;
     this.init();
@@ -36,7 +36,7 @@ class NetworkDetector {
       effectiveType: connection.effectiveType || '4g',
       downlink: connection.downlink || 10,
       rtt: connection.rtt || 50,
-      saveData: connection.saveData || false
+      saveData: connection.saveData || false,
     };
   }
 
@@ -46,7 +46,7 @@ class NetworkDetector {
       // Download a small image to measure speed
       const response = await fetch('/assets/images/default-cover.png', {
         method: 'GET',
-        cache: 'no-cache'
+        cache: 'no-cache',
       });
       const endTime = Date.now();
       const duration = (endTime - startTime) / 1000; // seconds
@@ -58,7 +58,7 @@ class NetworkDetector {
       this.speedTestResults = {
         speedMbps,
         duration,
-        effectiveType: this.classifyConnection(speedMbps)
+        effectiveType: this.classifyConnection(speedMbps),
       };
 
       this.notifyServiceWorker();
@@ -69,15 +69,19 @@ class NetworkDetector {
   }
 
   classifyConnection(speedMbps) {
-    if (speedMbps > 5) return 'fast';
-    if (speedMbps > 1) return 'medium';
+    if (speedMbps > 5) {
+      return 'fast';
+    }
+    if (speedMbps > 1) {
+      return 'medium';
+    }
     return 'slow';
   }
 
   getNetworkInfo() {
     return {
       ...this.networkInfo,
-      ...this.speedTestResults
+      ...this.speedTestResults,
     };
   }
 
@@ -98,7 +102,7 @@ class NetworkDetector {
       const info = this.getNetworkInfo();
       navigator.serviceWorker.controller.postMessage({
         action: 'network-info',
-        info
+        info,
       });
     }
   }

@@ -1,4 +1,5 @@
-l
+import { logger } from './logger.js';
+
 // Roshan Beats Audio Module using Web Audio API
 
 let audioContext;
@@ -15,7 +16,7 @@ let volume = 1;
 let gaplessEnabled = false;
 let nextBuffer;
 let startTime;
-let eventListeners = {};
+const eventListeners = {};
 
 // Background playback and Media Session
 let mediaSessionSupported = false;
@@ -34,7 +35,7 @@ let fadeInDuration = 1; // seconds
 let normalizationEnabled = false;
 let pitchShift = 0; // semitones
 let tempoShift = 0; // percentage
-let bookmarks = new Set();
+const bookmarks = new Set();
 let lyrics = null;
 let lyricsIndex = -1;
 let autoPlaySimilar = false;
@@ -45,13 +46,13 @@ const EQ_PRESETS = {
   rock: [3, 1, -1, 1, 3],
   pop: [-2, 1, 3, 2, -1],
   jazz: [2, 1, -1, 0, 2],
-  classical: [0, 0, 0, 0, 0]
+  classical: [0, 0, 0, 0, 0],
 };
 
 /**
- * Emits a custom event to all registered listeners
- * @param {string} event - The event name to emit
- * @param {*} data - The data to pass to event listeners
+ * Emits a custom event to all registered listeners.
+ * @param {string} event - The event name to emit.
+ * @param {*} data - The data to pass to event listeners.
  */
 function emit(event, data) {
   if (eventListeners[event]) {
@@ -68,14 +69,17 @@ function updateTime() {
 
 /**
  * Initializes the Web Audio API context and audio processing chain
- * Sets up gain nodes, analyzers, EQ filters, and media session support
+ * Sets up gain nodes, analyzers, EQ filters, and media session support.
  * @returns {void}
- * @emits audioContextSuspended - When audio context is resumed from suspended state
- * @emits error - When audio initialization fails
+ * @fires audioContextSuspended - When audio context is resumed from suspended state
+ * @fires error - When audio initialization fails
  */
 export function initAudio() {
+  logger.info('Initializing Web Audio API context');
+
   try {
     if (!audioContext) {
+      logger.debug('Creating new AudioContext');
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
       gainNode = audioContext.createGain();
       analyserNode = audioContext.createAnalyser();
@@ -83,17 +87,20 @@ export function initAudio() {
       gainNode.connect(analyserNode);
       analyserNode.connect(audioContext.destination);
 
+      logger.debug('Initializing EQ filters', { filterCount: EQ_FREQUENCIES.length });
       // Initialize EQ filters
-      filters = EQ_FREQUENCIES.map(freq => {
+      filters = EQ_FREQUENCIES.map((freq, index) => {
         const filter = audioContext.createBiquadFilter();
         filter.type = 'peaking';
         filter.frequency.value = freq;
         filter.Q.value = 1;
         filter.gain.value = 0;
+        logger.debug('Created EQ filter', { index, frequency: freq });
         return filter;
       });
 
       // Connect filters in chain
+      logger.debug('Connecting EQ filter chain');
       gainNode.connect(filters[0]);
       for (let i = 0; i < filters.length - 1; i++) {
         filters[i].connect(filters[i + 1]);
@@ -105,13 +112,21 @@ export function initAudio() {
 
       // Initialize Web Audio effects chain for advanced features
       initAudioEffects();
+
+      logger.info('Audio context initialized successfully', {
+        contextState: audioContext.state,
+        sampleRate: audioContext.sampleRate,
+        fftSize: analyserNode.fftSize,
+      });
     }
 
     if (audioContext.state === 'suspended') {
+      logger.info('Resuming suspended audio context');
       audioContext.resume();
       emit('audioContextSuspended');
     }
   } catch (error) {
+    logger.error('Failed to initialize Web Audio API', error);
     emit('error', error);
   }
 }
@@ -157,37 +172,56 @@ function initAudioEffects() {
 }
 
 function updateMediaSession() {
-  if (!mediaSessionSupported || !currentSong) return;
+  if (!mediaSessionSupported || !currentSong) {
+    return;
+  }
 
   navigator.mediaSession.metadata = new MediaMetadata({
     title: currentSong.title,
     artist: currentSong.artist,
     album: currentSong.album,
-    artwork: currentSong.cover ? [{ src: currentSong.cover, sizes: '512x512', type: 'image/png' }] : undefined
+    artwork: currentSong.cover ? [{ src: currentSong.cover, sizes: '512x512', type: 'image/png' }] : undefined,
   });
 
   navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
 }
 
 export async function loadSong(source) {
+  logger.info('Loading audio file', { sourceType: source instanceof Blob ? 'Blob' : 'URL', source: typeof source === 'string' ? source : 'Blob' });
+
   try {
+    const startTime = performance.now();
     let arrayBuffer;
     if (source instanceof Blob) {
+      logger.debug('Converting blob to array buffer', { size: source.size });
       arrayBuffer = await source.arrayBuffer();
     } else {
+      logger.debug('Fetching audio from URL');
       const response = await fetch(source);
       arrayBuffer = await response.arrayBuffer();
     }
+
+    logger.debug('Decoding audio data', { bufferSize: arrayBuffer.byteLength });
     buffer = await audioContext.decodeAudioData(arrayBuffer);
     duration = buffer.duration;
 
+    const loadTime = performance.now() - startTime;
+    logger.info('Audio file loaded and decoded successfully', {
+      duration: `${duration.toFixed(2)}s`,
+      channels: buffer.numberOfChannels,
+      sampleRate: buffer.sampleRate,
+      loadTime: `${loadTime.toFixed(2)}ms`,
+    });
+
     // Apply normalization if enabled
     if (normalizationEnabled) {
+      logger.debug('Applying audio normalization');
       normalizeAudio();
     }
 
     emit('loaded', { duration, buffer });
   } catch (error) {
+    logger.error('Failed to load/decode audio file', error, { source });
     // Fallback to HTML Audio element for unsupported formats
     console.warn('Web Audio decoding failed, format may not be supported:', error);
     emit('fileCorrupted', { error: error.message, source });
@@ -196,7 +230,9 @@ export async function loadSong(source) {
 }
 
 function normalizeAudio() {
-  if (!buffer) return;
+  if (!buffer) {
+    return;
+  }
 
   // Simple peak normalization - find max amplitude and scale
   const channelData = buffer.getChannelData(0);
@@ -218,22 +254,37 @@ function normalizeAudio() {
 }
 
 /**
- * Starts or resumes audio playback
- * @param {Object|null} song - Song object to load and play, or null to resume current song
- * @param {boolean} startFromQueue - Whether this play call is from queue management (affects fade-in)
+ * Starts or resumes audio playback.
+ * @param {object | null} song - Song object to load and play, or null to resume current song.
+ * @param {boolean} startFromQueue - Whether this play call is from queue management (affects fade-in).
  * @returns {void}
- * @emits play - When playback starts
+ * @fires play - When playback starts
  */
 export function play(song = null, startFromQueue = false) {
+  logger.debug('Play function called', { hasSong: !!song, startFromQueue, currentTime });
+
   if (song) {
     // Load new song
+    logger.info('Loading new song for playback', { songTitle: song.title, songArtist: song.artist });
     loadSongFromQueue(song);
     return;
   }
 
-  if (!buffer) return;
+  if (!buffer) {
+    logger.warn('Cannot play: no audio buffer loaded');
+    return;
+  }
+
+  logger.info('Starting audio playback', {
+    currentTime,
+    duration,
+    playbackRate,
+    fadeInEnabled,
+    startFromQueue,
+  });
 
   if (sourceNode) {
+    logger.debug('Stopping existing source node');
     sourceNode.stop();
   }
 
@@ -243,6 +294,7 @@ export function play(song = null, startFromQueue = false) {
 
   // Apply pitch/tempo if needed
   if (pitchShift !== 0 || tempoShift !== 0) {
+    logger.debug('Applying pitch/tempo adjustments', { pitchShift, tempoShift });
     // Note: Full pitch/tempo shifting requires AudioWorklet or external library
     // For now, we'll use basic playback rate adjustment
     const adjustedRate = playbackRate * (1 + tempoShift / 100);
@@ -253,6 +305,7 @@ export function play(song = null, startFromQueue = false) {
 
   // Handle fade-in
   if (fadeInEnabled && !startFromQueue) {
+    logger.debug('Applying fade-in effect');
     applyFadeIn();
   }
 
@@ -261,6 +314,7 @@ export function play(song = null, startFromQueue = false) {
   sourceNode.start(0, currentTime);
 
   sourceNode.onended = () => {
+    logger.debug('Audio source ended');
     isPlaying = false;
     handleTrackEnd();
   };
@@ -270,10 +324,14 @@ export function play(song = null, startFromQueue = false) {
   emit('play');
   updateTime();
   updateLyricsSync();
+
+  logger.info('Audio playback started successfully');
 }
 
 function applyFadeIn() {
-  if (!gainNode) return;
+  if (!gainNode) {
+    return;
+  }
 
   const fadeInStart = audioContext.currentTime;
   gainNode.gain.setValueAtTime(0, fadeInStart);
@@ -329,12 +387,17 @@ function loadSongFromQueue(song) {
 }
 
 export function pause() {
+  logger.debug('Pause function called', { isPlaying, hasSourceNode: !!sourceNode });
+
   if (sourceNode && isPlaying) {
+    logger.info('Pausing audio playback');
     sourceNode.stop();
     currentTime += (audioContext.currentTime - startTime) * playbackRate;
     isPlaying = false;
     updateMediaSession();
     emit('pause');
+  } else {
+    logger.debug('Pause called but audio not playing');
   }
 }
 
@@ -348,12 +411,23 @@ export function stop() {
 }
 
 export function seek(time) {
+  const originalTime = time;
   time = Math.max(0, Math.min(time, duration));
+
+  logger.debug('Seek requested', {
+    requestedTime: originalTime,
+    clampedTime: time,
+    duration,
+    isPlaying,
+  });
+
   if (isPlaying) {
+    logger.info('Seeking while playing - pausing and restarting', { seekTime: time });
     pause();
     currentTime = time;
     play();
   } else {
+    logger.info('Seeking while paused', { seekTime: time });
     currentTime = time;
   }
 }
@@ -373,10 +447,16 @@ export function setPlaybackRate(rate) {
 }
 
 export function applyEQ(bands) {
+  logger.debug('Applying EQ settings', { bands, filterCount: filters.length });
+
   if (filters.length === bands.length) {
     filters.forEach((filter, i) => {
       filter.gain.value = bands[i];
+      logger.debug('Set EQ band', { band: i, frequency: EQ_FREQUENCIES[i], gain: bands[i] });
     });
+    logger.info('EQ settings applied successfully');
+  } else {
+    logger.warn('EQ bands count mismatch', { expected: filters.length, received: bands.length });
   }
 }
 
@@ -387,14 +467,25 @@ export function setEQPreset(preset) {
 }
 
 export function getVisualizerData(type) {
-  if (!analyserNode) return null;
+  if (!analyserNode) {
+    logger.debug('Visualizer data requested but analyser not available');
+    return null;
+  }
+
   const bufferLength = analyserNode.frequencyBinCount;
   const data = new Uint8Array(bufferLength);
+
   if (type === 'spectrum' || type === 'circular') {
     analyserNode.getByteFrequencyData(data);
   } else if (type === 'waveform') {
     analyserNode.getByteTimeDomainData(data);
   }
+
+  // Log occasionally to avoid spam
+  if (Math.random() < 0.001) { // ~0.1% of calls
+    logger.debug('Visualizer data retrieved', { type, bufferLength, sampleValues: [data[0], data[1], data[2]] });
+  }
+
   return data;
 }
 
@@ -515,31 +606,51 @@ function getAutoPlaySuggestion() {
   // Find songs by same artist or similar genres
   const allSongs = getSongs ? getSongs() : [];
   const candidates = allSongs.filter(song => {
-    if (song.id === currentSong.id) return false; // Don't repeat current song
+    if (song.id === currentSong.id) {
+      return false;
+    } // Don't repeat current song
 
     // Prioritize same artist
-    if (song.artist === currentSong.artist) return true;
+    if (song.artist === currentSong.artist) {
+      return true;
+    }
 
     // Then same genre
-    if (song.genre && currentSong.genre && song.genre === currentSong.genre) return true;
+    if (song.genre && currentSong.genre && song.genre === currentSong.genre) {
+      return true;
+    }
 
     // Then recently played artists/genres
-    if (recentArtists.includes(song.artist)) return true;
-    if (song.genre && recentGenres.includes(song.genre)) return true;
+    if (recentArtists.includes(song.artist)) {
+      return true;
+    }
+    if (song.genre && recentGenres.includes(song.genre)) {
+      return true;
+    }
 
     return false;
   });
 
-  if (candidates.length === 0) return null;
+  if (candidates.length === 0) {
+    return null;
+  }
 
   // Weight candidates by relevance
   const weightedCandidates = candidates.map(song => {
     let score = 1;
 
-    if (song.artist === currentSong.artist) score += 3;
-    if (song.genre === currentSong.genre) score += 2;
-    if (recentArtists.includes(song.artist)) score += 1;
-    if (recentGenres.includes(song.genre)) score += 1;
+    if (song.artist === currentSong.artist) {
+      score += 3;
+    }
+    if (song.genre === currentSong.genre) {
+      score += 2;
+    }
+    if (recentArtists.includes(song.artist)) {
+      score += 1;
+    }
+    if (recentGenres.includes(song.genre)) {
+      score += 1;
+    }
 
     // Reduce score for recently played songs
     const recentPlays = history.filter(h => h.songId === song.id).length;
@@ -560,7 +671,9 @@ function getShuffledNextSong() {
 
   // Smart shuffle based on listening history and preferences
   const availableSongs = queue.filter((_, i) => i !== queueIndex);
-  if (availableSongs.length === 0) return null;
+  if (availableSongs.length === 0) {
+    return null;
+  }
 
   // Get listening history to weight shuffle
   const history = getHistory ? getHistory(50) : [];
@@ -678,12 +791,16 @@ export function cancelSleepTimer() {
 }
 
 export function getSleepTimerRemaining() {
-  if (!sleepTimerEnd) return 0;
+  if (!sleepTimerEnd) {
+    return 0;
+  }
   return Math.max(0, sleepTimerEnd - Date.now());
 }
 
 function fadeOutAndStop() {
-  if (!gainNode) return;
+  if (!gainNode) {
+    return;
+  }
 
   const fadeOutStart = audioContext.currentTime;
   const fadeOutEnd = fadeOutStart + 5; // 5 second fade out
@@ -710,7 +827,9 @@ export function getLyrics() {
 }
 
 function updateLyricsSync() {
-  if (!lyrics || !isPlaying) return;
+  if (!lyrics || !isPlaying) {
+    return;
+  }
 
   const currentTimeMs = getCurrentTime() * 1000;
   let newIndex = -1;

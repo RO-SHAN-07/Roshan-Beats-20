@@ -39,6 +39,10 @@
             <span class="wallet-icon">📱</span>
             Apple Pay / Google Pay
         </button>
+        <button class="payment-method-btn" id="google-pay-btn" aria-label="Pay with Google Pay only">
+            <span class="wallet-icon">💳</span>
+            Google Pay
+        </button>
         <div class="divider">
             <span>or</span>
         </div>
@@ -55,6 +59,87 @@
 </div>
 
 <script>
+document.getElementById('google-pay-btn').addEventListener('click', async () => {
+    if (!window.PaymentRequest) {
+        alert('Payment Request API not supported in this browser');
+        return;
+    }
+
+    try {
+        const supportedPaymentMethods = [
+            {
+                supportedMethods: 'https://google.com/pay',
+                data: {
+                    environment: 'TEST',
+                    apiVersion: 2,
+                    apiVersionMinor: 0,
+                    merchantInfo: {
+                        merchantId: '12345678901234567890',
+                        merchantName: 'Roshan Beats',
+                    },
+                    allowedPaymentMethods: [{
+                        type: 'CARD',
+                        parameters: {
+                            allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
+                            allowedCardNetworks: ['MASTERCARD', 'VISA', 'AMEX'],
+                        },
+                        tokenizationSpecification: {
+                            type: 'PAYMENT_GATEWAY',
+                            parameters: {
+                                gateway: 'example',
+                                gatewayMerchantId: 'exampleGatewayMerchantId',
+                            },
+                        },
+                    }],
+                },
+            },
+        ];
+
+        const paymentDetails = {
+            total: {
+                label: 'Total',
+                amount: {
+                    currency: 'USD',
+                    value: '9.99',
+                },
+            },
+            displayItems: [
+                {
+                    label: 'Roshan Beats Premium',
+                    amount: {
+                        currency: 'USD',
+                        value: '9.99',
+                    },
+                },
+            ],
+        };
+
+        const options = {
+            requestPayerName: true,
+            requestPayerEmail: true,
+            requestPayerPhone: false,
+        };
+
+        const request = new PaymentRequest(supportedPaymentMethods, paymentDetails, options);
+
+        const response = await request.show();
+
+        // Process the payment response
+        await response.complete('success');
+
+        console.log('Google Pay successful:', response);
+
+        alert('Payment successful! Welcome to Roshan Beats Premium.');
+
+        // Update user status
+        localStorage.setItem('premiumUser', 'true');
+
+    } catch (error) {
+        console.error('Google Pay failed:', error);
+        alert('Payment failed: ' + error.message);
+    }
+});
+
 document.getElementById('digital-wallet-btn').addEventListener('click', async () => {
     if (!window.PaymentRequest) {
         alert('Payment Request API not supported in this browser');

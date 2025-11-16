@@ -1,3 +1,7 @@
+/* Font loading optimization - Using web fonts for now */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons&display=swap');
+
 /* Material Design Base Styles */
 /* Global resets and typography */
 * {
@@ -24,31 +28,6 @@ body {
     /* Performance optimizations */
     contain: layout style paint;
     will-change: auto;
-}
-
-/* Font loading optimization */
-@font-face {
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('assets/fonts/roboto-regular.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 500;
-    font-display: swap;
-    src: url('assets/fonts/roboto-medium.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'Material Icons';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('assets/fonts/material-icons.woff2') format('woff2');
 }
 
 /* Material Design Typography */

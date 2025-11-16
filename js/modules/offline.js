@@ -6,7 +6,7 @@ let serviceWorkerRegistration = null;
 
 export function registerSW() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register(new URL('/sw.js', import.meta.url))
       .then(registration => {
         serviceWorkerRegistration = registration;
         console.log('Service Worker registered:', registration);
@@ -45,7 +45,7 @@ export function cacheSong(songId) {
   }
 }
 
-export function isOnline() {
+export function getOnlineStatus() {
   return navigator.onLine;
 }
 

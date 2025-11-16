@@ -35,8 +35,8 @@ async function generateIcons() {
   // Generate shortcut icons
   const shortcutSizes = [96];
   for (const size of shortcutSizes) {
-    const playShortcut = path.join(iconsDir, `play-shortcut.png`);
-    const playlistShortcut = path.join(iconsDir, `playlist-shortcut.png`);
+    const playShortcut = path.join(iconsDir, 'play-shortcut.png');
+    const playlistShortcut = path.join(iconsDir, 'playlist-shortcut.png');
 
     await sharp(Buffer.from(svgIcon))
       .resize(size, size)
@@ -48,7 +48,7 @@ async function generateIcons() {
       .png()
       .toFile(playlistShortcut);
 
-    console.log(`Generated shortcut icons`);
+    console.log('Generated shortcut icons');
   }
 }
 

@@ -16,7 +16,7 @@ class RecommendationEngine {
       artist: song.artist,
       genre: song.genre,
       timestamp: Date.now(),
-      duration: song.duration
+      duration: song.duration,
     };
 
     this.playHistory.push(playRecord);

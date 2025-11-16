@@ -398,3 +398,86 @@
         bottom: 80px;
     }
 }
+
+/* Safe area insets for devices with notches (iPhone X+, Android) */
+@supports (padding: max(0px)) {
+    body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+
+    .mini-player {
+        bottom: calc(0px + env(safe-area-inset-bottom));
+    }
+
+    .bottom-nav {
+        padding-bottom: calc(0.25rem + env(safe-area-inset-bottom));
+    }
+
+    .fab {
+        bottom: calc(1rem + env(safe-area-inset-bottom));
+    }
+}
+
+/* High screen density adjustments */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    /* Retina displays and high-DPI screens */
+    .song-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+
+    .song-cover {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+
+    .album-art {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+@media (-webkit-min-device-pixel-ratio: 3), (min-resolution: 288dpi) {
+    /* Super high-DPI screens */
+    .song-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    .nav-icon {
+        font-size: 1.2rem;
+    }
+
+    .btn {
+        font-weight: 500;
+    }
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) and (orientation: portrait) {
+    .screen {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .modal-content {
+        margin: 1rem;
+        max-height: calc(100vh - 2rem);
+        overflow-y: auto;
+    }
+
+    .search-input {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+    .mini-player {
+        height: 50px;
+    }
+
+    .bottom-nav .nav-item {
+        padding: 0.125rem;
+    }
+}

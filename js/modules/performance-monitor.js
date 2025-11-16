@@ -1,6 +1,6 @@
 /**
  * Performance monitoring and optimization utilities for Roshan Beats PWA
- * Handles memory management, debouncing, efficient DOM manipulation, and performance metrics
+ * Handles memory management, debouncing, efficient DOM manipulation, and performance metrics.
  */
 
 import { logger } from './logger.js';
@@ -22,7 +22,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Sets up performance monitoring and cleanup
+   * Sets up performance monitoring and cleanup.
    */
   setupPerformanceMonitoring() {
     // Monitor memory usage
@@ -43,7 +43,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Starts memory usage monitoring
+   * Starts memory usage monitoring.
    */
   startMemoryMonitoring() {
     const checkMemory = () => {
@@ -54,7 +54,7 @@ class PerformanceMonitor {
         logger.warn('High memory usage detected', {
           used: memInfo.usedJSHeapSize,
           limit: memInfo.jsHeapSizeLimit,
-          percent: usedPercent
+          percent: usedPercent,
         });
 
         this.performMemoryCleanup();
@@ -70,7 +70,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Sets up monitoring for long tasks
+   * Sets up monitoring for long tasks.
    */
   setupLongTaskMonitoring() {
     try {
@@ -80,7 +80,7 @@ class PerformanceMonitor {
             logger.warn('Long task detected', {
               duration: entry.duration,
               startTime: entry.startTime,
-              name: entry.name
+              name: entry.name,
             });
           }
         }
@@ -94,7 +94,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Sets up periodic cleanup of resources
+   * Sets up periodic cleanup of resources.
    */
   setupPeriodicCleanup() {
     // Clean up every 5 minutes
@@ -104,7 +104,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Monitors page visibility for performance adjustments
+   * Monitors page visibility for performance adjustments.
    */
   setupVisibilityMonitoring() {
     document.addEventListener('visibilitychange', () => {
@@ -117,7 +117,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Called when page becomes hidden
+   * Called when page becomes hidden.
    */
   onPageHidden() {
     // Reduce performance monitoring frequency
@@ -128,7 +128,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Called when page becomes visible
+   * Called when page becomes visible.
    */
   onPageVisible() {
     // Resume full performance monitoring
@@ -144,7 +144,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Pauses non-essential operations when page is hidden
+   * Pauses non-essential operations when page is hidden.
    */
   pauseNonEssentialOperations() {
     // Pause animations
@@ -155,7 +155,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Resumes operations when page becomes visible
+   * Resumes operations when page becomes visible.
    */
   resumeOperations() {
     // Resume animations
@@ -163,7 +163,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Performs memory cleanup
+   * Performs memory cleanup.
    */
   performMemoryCleanup() {
     // Clear cached images not in viewport
@@ -181,7 +181,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Performs periodic cleanup of resources
+   * Performs periodic cleanup of resources.
    */
   performPeriodicCleanup() {
     // Clean up old cached data
@@ -194,7 +194,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Clears images that are not in viewport to save memory
+   * Clears images that are not in viewport to save memory.
    */
   clearInvisibleImages() {
     const images = document.querySelectorAll('img[data-src]');
@@ -213,7 +213,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Cleans up orphaned event listeners
+   * Cleans up orphaned event listeners.
    */
   cleanupOrphanedListeners() {
     // This is a simplified cleanup - in practice, you'd need to track listeners more carefully
@@ -221,7 +221,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Cleans up expired cached data
+   * Cleans up expired cached data.
    */
   cleanupExpiredCache() {
     const now = Date.now();
@@ -245,7 +245,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Resets performance metrics
+   * Resets performance metrics.
    */
   resetMetrics() {
     // Keep only recent metrics (last hour)
@@ -259,10 +259,10 @@ class PerformanceMonitor {
   }
 
   /**
-   * Measures execution time of a function
-   * @param {string} name - Name of the operation
-   * @param {Function} fn - Function to measure
-   * @returns {*} - Result of the function
+   * Measures execution time of a function.
+   * @param {string} name - Name of the operation.
+   * @param {Function} fn - Function to measure.
+   * @returns {*} - Result of the function.
    */
   async measureExecutionTime(name, fn) {
     const startTime = performance.now();
@@ -280,17 +280,17 @@ class PerformanceMonitor {
   }
 
   /**
-   * Records a performance metric
-   * @param {string} name - Metric name
-   * @param {number} value - Metric value
-   * @param {boolean} success - Whether the operation succeeded
+   * Records a performance metric.
+   * @param {string} name - Metric name.
+   * @param {number} value - Metric value.
+   * @param {boolean} success - Whether the operation succeeded.
    */
   recordMetric(name, value, success) {
     const metric = {
       name,
       value,
       success,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     if (!this.metrics.has(name)) {
@@ -312,9 +312,9 @@ class PerformanceMonitor {
   }
 
   /**
-   * Gets performance metrics for analysis
-   * @param {string} name - Metric name (optional)
-   * @returns {Object} - Performance metrics
+   * Gets performance metrics for analysis.
+   * @param {string} name - Metric name (optional).
+   * @returns {object} - Performance metrics.
    */
   getMetrics(name = null) {
     if (name) {
@@ -329,18 +329,20 @@ class PerformanceMonitor {
   }
 
   /**
-   * Debounces a function call
-   * @param {Function} func - Function to debounce
-   * @param {number} wait - Wait time in milliseconds
-   * @param {boolean} immediate - Whether to call immediately
-   * @returns {Function} - Debounced function
+   * Debounces a function call.
+   * @param {Function} func - Function to debounce.
+   * @param {number} wait - Wait time in milliseconds.
+   * @param {boolean} immediate - Whether to call immediately.
+   * @returns {Function} - Debounced function.
    */
   debounce(func, wait, immediate = false) {
     const context = this;
     return function(...args) {
       const later = () => {
         context.debounceTimers.delete(func);
-        if (!immediate) func.apply(this, args);
+        if (!immediate) {
+          func.apply(this, args);
+        }
       };
 
       const callNow = immediate && !context.debounceTimers.has(func);
@@ -348,15 +350,17 @@ class PerformanceMonitor {
       clearTimeout(context.debounceTimers.get(func));
       context.debounceTimers.set(func, setTimeout(later, wait));
 
-      if (callNow) func.apply(this, args);
+      if (callNow) {
+        func.apply(this, args);
+      }
     };
   }
 
   /**
-   * Throttles a function call
-   * @param {Function} func - Function to throttle
-   * @param {number} limit - Time limit in milliseconds
-   * @returns {Function} - Throttled function
+   * Throttles a function call.
+   * @param {Function} func - Function to throttle.
+   * @param {number} limit - Time limit in milliseconds.
+   * @returns {Function} - Throttled function.
    */
   throttle(func, limit) {
     const context = this;
@@ -371,8 +375,8 @@ class PerformanceMonitor {
   }
 
   /**
-   * Efficiently updates DOM with batched operations
-   * @param {Function} updateFn - Function that performs DOM updates
+   * Efficiently updates DOM with batched operations.
+   * @param {Function} updateFn - Function that performs DOM updates.
    */
   batchDOMUpdates(updateFn) {
     // Use requestAnimationFrame for smooth updates
@@ -383,15 +387,17 @@ class PerformanceMonitor {
   }
 
   /**
-   * Creates an efficient event listener with automatic cleanup
-   * @param {Element} element - DOM element
-   * @param {string} event - Event type
-   * @param {Function} handler - Event handler
-   * @param {Object} options - Event listener options
-   * @returns {Function} - Cleanup function
+   * Creates an efficient event listener with automatic cleanup.
+   * @param {Element} element - DOM element.
+   * @param {string} event - Event type.
+   * @param {Function} handler - Event handler.
+   * @param {object} options - Event listener options.
+   * @returns {Function} - Cleanup function.
    */
   addEfficientListener(element, event, handler, options = {}) {
-    if (!element) return () => {};
+    if (!element) {
+      return () => {};
+    }
 
     // Debounce scroll and resize events by default
     let finalHandler = handler;
@@ -421,11 +427,11 @@ class PerformanceMonitor {
   }
 
   /**
-   * Creates an intersection observer with automatic cleanup
-   * @param {Element} element - Element to observe
-   * @param {Function} callback - Intersection callback
-   * @param {Object} options - Intersection observer options
-   * @returns {Function} - Cleanup function
+   * Creates an intersection observer with automatic cleanup.
+   * @param {Element} element - Element to observe.
+   * @param {Function} callback - Intersection callback.
+   * @param {object} options - Intersection observer options.
+   * @returns {Function} - Cleanup function.
    */
   observeIntersection(element, callback, options = {}) {
     if (!element || !('IntersectionObserver' in window)) {
@@ -443,10 +449,10 @@ class PerformanceMonitor {
   }
 
   /**
-   * Creates a resize observer with automatic cleanup
-   * @param {Element} element - Element to observe
-   * @param {Function} callback - Resize callback
-   * @returns {Function} - Cleanup function
+   * Creates a resize observer with automatic cleanup.
+   * @param {Element} element - Element to observe.
+   * @param {Function} callback - Resize callback.
+   * @returns {Function} - Cleanup function.
    */
   observeResize(element, callback) {
     if (!element || !('ResizeObserver' in window)) {
@@ -464,11 +470,11 @@ class PerformanceMonitor {
   }
 
   /**
-   * Creates a mutation observer with automatic cleanup
-   * @param {Element} element - Element to observe
-   * @param {Function} callback - Mutation callback
-   * @param {Object} options - Mutation observer options
-   * @returns {Function} - Cleanup function
+   * Creates a mutation observer with automatic cleanup.
+   * @param {Element} element - Element to observe.
+   * @param {Function} callback - Mutation callback.
+   * @param {object} options - Mutation observer options.
+   * @returns {Function} - Cleanup function.
    */
   observeMutations(element, callback, options = {}) {
     if (!element || !('MutationObserver' in window)) {
@@ -486,7 +492,7 @@ class PerformanceMonitor {
   }
 
   /**
-   * Cleans up all observers and listeners
+   * Cleans up all observers and listeners.
    */
   cleanup() {
     // Clean up observers
@@ -511,8 +517,8 @@ class PerformanceMonitor {
   }
 
   /**
-   * Gets memory usage information
-   * @returns {Object} - Memory usage data
+   * Gets memory usage information.
+   * @returns {object} - Memory usage data.
    */
   getMemoryUsage() {
     if ('memory' in performance) {
@@ -521,14 +527,14 @@ class PerformanceMonitor {
         used: mem.usedJSHeapSize,
         total: mem.totalJSHeapSize,
         limit: mem.jsHeapSizeLimit,
-        percent: (mem.usedJSHeapSize / mem.jsHeapSizeLimit) * 100
+        percent: (mem.usedJSHeapSize / mem.jsHeapSizeLimit) * 100,
       };
     }
     return null;
   }
 
   /**
-   * Forces garbage collection (if available)
+   * Forces garbage collection (if available).
    */
   forceGC() {
     if (window.gc) {

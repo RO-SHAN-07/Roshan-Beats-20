@@ -19,7 +19,7 @@ class I18nManager {
         'dark_mode': 'Dark Mode',
         'auto': 'Auto',
         'light': 'Light',
-        'dark': 'Dark'
+        'dark': 'Dark',
       },
       es: {
         'home': 'Inicio',
@@ -38,7 +38,7 @@ class I18nManager {
         'dark_mode': 'Modo oscuro',
         'auto': 'Automático',
         'light': 'Claro',
-        'dark': 'Oscuro'
+        'dark': 'Oscuro',
       },
       fr: {
         'home': 'Accueil',
@@ -57,7 +57,7 @@ class I18nManager {
         'dark_mode': 'Mode sombre',
         'auto': 'Auto',
         'light': 'Clair',
-        'dark': 'Sombre'
+        'dark': 'Sombre',
       },
       de: {
         'home': 'Startseite',
@@ -76,7 +76,7 @@ class I18nManager {
         'dark_mode': 'Dunkler Modus',
         'auto': 'Auto',
         'light': 'Hell',
-        'dark': 'Dunkel'
+        'dark': 'Dunkel',
       },
       zh: {
         'home': '首页',
@@ -95,8 +95,8 @@ class I18nManager {
         'dark_mode': '深色模式',
         'auto': '自动',
         'light': '浅色',
-        'dark': '深色'
-      }
+        'dark': '深色',
+      },
     };
   }
 

@@ -11,10 +11,10 @@ describe('Audio-Storage Integration', () => {
         transaction: jest.fn(() => ({
           objectStore: jest.fn(() => ({
             add: jest.fn(() => ({ onsuccess: null, result: 1 })),
-            get: jest.fn(() => ({ onsuccess: null, result: { blob: new Blob() } }))
-          }))
-        }))
-      }
+            get: jest.fn(() => ({ onsuccess: null, result: { blob: new Blob() } })),
+          })),
+        })),
+      },
     });
   });
 
