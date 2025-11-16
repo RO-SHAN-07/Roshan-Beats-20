@@ -1,3 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6750a4">
+  <title>Roshan Beats - Payment</title>
+  <meta name="description" content="Explore payment in Roshan Beats, your advanced music player PWA.">
+  <meta name="keywords" content="payment, music player, Roshan Beats">
+  <link rel="canonical" href="https://roshanbeats.com/html/payment.html">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/themes.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
 <div id="payment-screen" class="screen">
     <div class="nav-bar">
         <button class="nav-btn" id="nav-home-payment">🏠 Home</button>
@@ -17,13 +34,124 @@
         <button class="nav-btn active" id="nav-payment-payment">💳 Payment</button>
     </div>
     <h2>Secure Payment</h2>
+    <div class="payment-methods">
+        <button class="payment-method-btn" id="digital-wallet-btn" aria-label="Pay with digital wallet">
+            <span class="wallet-icon">📱</span>
+            Apple Pay / Google Pay
+        </button>
+        <div class="divider">
+            <span>or</span>
+        </div>
+    </div>
     <div class="payment-container">
         <form class="payment-form" id="payment-form">
-            <input type="text" placeholder="Card Number" id="card-number" maxlength="19">
-            <input type="text" placeholder="MM/YY" id="expiry" maxlength="5">
-            <input type="text" placeholder="CVV" id="cvv" maxlength="3">
-            <input type="text" placeholder="Name on Card" id="card-name">
+            <input type="text" placeholder="Card Number" id="card-number" maxlength="19" aria-label="Card number">
+            <input type="text" placeholder="MM/YY" id="expiry" maxlength="5" aria-label="Expiry date">
+            <input type="text" placeholder="CVV" id="cvv" maxlength="3" aria-label="CVV">
+            <input type="text" placeholder="Name on Card" id="card-name" aria-label="Name on card">
             <button type="submit">Pay Now</button>
         </form>
     </div>
 </div>
+
+<script>
+document.getElementById('digital-wallet-btn').addEventListener('click', async () => {
+    if (!window.PaymentRequest) {
+        alert('Payment Request API not supported in this browser');
+        return;
+    }
+
+    try {
+        const supportedPaymentMethods = [
+            {
+                supportedMethods: 'https://apple.com/apple-pay',
+                data: {
+                    version: 3,
+                    merchantIdentifier: 'merchant.roshanbeats.com',
+                    merchantCapabilities: ['supports3DS'],
+                    supportedNetworks: ['visa', 'mastercard', 'amex'],
+                    countryCode: 'US',
+                },
+            },
+            {
+                supportedMethods: 'https://google.com/pay',
+                data: {
+                    environment: 'TEST',
+                    apiVersion: 2,
+                    apiVersionMinor: 0,
+                    merchantInfo: {
+                        merchantId: '12345678901234567890',
+                        merchantName: 'Roshan Beats',
+                    },
+                    allowedPaymentMethods: [{
+                        type: 'CARD',
+                        parameters: {
+                            allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
+                            allowedCardNetworks: ['MASTERCARD', 'VISA'],
+                        },
+                        tokenizationSpecification: {
+                            type: 'PAYMENT_GATEWAY',
+                            parameters: {
+                                gateway: 'example',
+                                gatewayMerchantId: 'exampleGatewayMerchantId',
+                            },
+                        },
+                    }],
+                },
+            },
+        ];
+
+        const paymentDetails = {
+            total: {
+                label: 'Total',
+                amount: {
+                    currency: 'USD',
+                    value: '9.99', // Premium subscription price
+                },
+            },
+            displayItems: [
+                {
+                    label: 'Roshan Beats Premium',
+                    amount: {
+                        currency: 'USD',
+                        value: '9.99',
+                    },
+                },
+            ],
+        };
+
+        const options = {
+            requestPayerName: true,
+            requestPayerEmail: true,
+            requestPayerPhone: false,
+        };
+
+        const request = new PaymentRequest(supportedPaymentMethods, paymentDetails, options);
+
+        const response = await request.show();
+
+        // Process the payment response
+        await response.complete('success');
+
+        // Here you would send the payment token to your server
+        console.log('Payment successful:', response);
+
+        alert('Payment successful! Welcome to Roshan Beats Premium.');
+
+        // Update user status
+        localStorage.setItem('premiumUser', 'true');
+
+    } catch (error) {
+        console.error('Payment failed:', error);
+        alert('Payment failed: ' + error.message);
+    }
+});
+
+// Handle traditional form submission
+document.getElementById('payment-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    alert('Traditional payment processing not implemented. Use digital wallet for now.');
+});
+</script>
+</body>
+</html>

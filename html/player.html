@@ -1,32 +1,50 @@
-<div id="player-screen" class="screen">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6750a4">
+  <title>Roshan Beats - Music Player</title>
+  <meta name="description" content="Play your music with Roshan Beats player. Control playback, adjust equalizer, view lyrics, and enjoy audio visualization.">
+  <meta name="keywords" content="music player, playback, equalizer, visualizer, lyrics, audio controls, Roshan Beats">
+  <link rel="canonical" href="https://roshanbeats.com/player.html">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/themes.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+<div id="player-screen" class="screen" id="main-content">
     <div class="player-background" id="player-background"></div>
-    <div class="theme-switcher">
-        <button class="theme-btn theme-purple-btn" id="theme-purple"></button>
-        <button class="theme-btn theme-ice-btn" id="theme-ice"></button>
+    <div class="theme-switcher" role="group" aria-label="Theme selector">
+        <button class="theme-btn theme-purple-btn" id="theme-purple" aria-label="Purple theme"></button>
+        <button class="theme-btn theme-ice-btn" id="theme-ice" aria-label="Ice theme"></button>
     </div>
     <div class="player-container">
         <div class="album-art" id="album-art">
-            <canvas id="visualizer"></canvas>
+            <canvas id="visualizer" aria-label="Audio visualizer" role="img"></canvas>
         </div>
         <div class="track-info">
-            <h2 id="track-title">Track Title</h2>
+            <h1 id="track-title">Track Title</h1>
             <p id="track-artist">Artist</p>
         </div>
-        <div class="seek-bar" id="seek-bar">
+        <div class="seek-bar" id="seek-bar" role="slider" aria-label="Seek position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <div class="seek-bar-fill" id="seek-fill"></div>
         </div>
-        <div class="controls">
-            <button class="control-btn" id="shuffle-btn" title="Shuffle">🔀</button>
-            <button class="control-btn" id="prev-btn" title="Previous">⏮</button>
-            <button class="control-btn" id="play-pause-btn" title="Play/Pause">▶</button>
-            <button class="control-btn" id="next-btn" title="Next">⏭</button>
-            <button class="control-btn" id="repeat-btn" title="Repeat">🔁</button>
+        <div class="controls" role="group" aria-label="Playback controls">
+            <button class="control-btn" id="shuffle-btn" aria-label="Shuffle playlist">🔀</button>
+            <button class="control-btn" id="prev-btn" aria-label="Previous track">⏮</button>
+            <button class="control-btn" id="play-pause-btn" aria-label="Play or pause">▶</button>
+            <button class="control-btn" id="next-btn" aria-label="Next track">⏭</button>
+            <button class="control-btn" id="repeat-btn" aria-label="Repeat mode">🔁</button>
         </div>
         <div class="secondary-controls">
-            <button class="control-btn" id="bookmark-btn" title="Bookmark">❤️</button>
+            <button class="control-btn" id="bookmark-btn" aria-label="Bookmark track">❤️</button>
+            <button class="control-btn" id="share-btn" aria-label="Share track">📤</button>
             <div class="speed-control">
-                <span>Speed:</span>
-                <select id="speed-select">
+                <label for="speed-select">Playback speed:</label>
+                <select id="speed-select" aria-label="Playback speed">
                     <option value="0.5">0.5x</option>
                     <option value="0.75">0.75x</option>
                     <option value="1" selected>1x</option>
@@ -36,61 +54,96 @@
                 </select>
             </div>
         </div>
-        <div class="volume-control">
-            <span>🔊</span>
-            <div class="volume-bar" id="volume-bar">
+        <div class="volume-control" role="group" aria-label="Volume control">
+            <span aria-hidden="true">🔊</span>
+            <div class="volume-bar" id="volume-bar" role="slider" aria-label="Volume level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
                 <div class="volume-fill" id="volume-fill"></div>
             </div>
-            <button id="mute-btn">🔇</button>
+            <button id="mute-btn" aria-label="Mute or unmute">🔇</button>
         </div>
-        <div class="eq-controls">
-            <h3>Equalizer</h3>
-            <div id="eq-presets">
-                <button class="eq-preset" data-preset="normal">Normal</button>
-                <button class="eq-preset" data-preset="bass">Bass Boost</button>
-                <button class="eq-preset" data-preset="pop">Pop</button>
-                <button class="eq-preset" data-preset="rock">Rock</button>
-                <button class="eq-preset" data-preset="jazz">Jazz</button>
-                <button class="eq-preset" data-preset="classical">Classical</button>
+        <div class="eq-controls" role="region" aria-labelledby="eq-heading">
+            <h2 id="eq-heading">Equalizer</h2>
+            <div id="eq-presets" role="group" aria-label="Equalizer presets">
+                <button class="eq-preset" data-preset="normal" aria-pressed="true">Normal</button>
+                <button class="eq-preset" data-preset="bass" aria-pressed="false">Bass Boost</button>
+                <button class="eq-preset" data-preset="pop" aria-pressed="false">Pop</button>
+                <button class="eq-preset" data-preset="rock" aria-pressed="false">Rock</button>
+                <button class="eq-preset" data-preset="jazz" aria-pressed="false">Jazz</button>
+                <button class="eq-preset" data-preset="classical" aria-pressed="false">Classical</button>
             </div>
         </div>
-        <div class="visualizer-controls">
-            <h3>Visualizer</h3>
-            <div id="visualizer-presets">
-                <button class="eq-preset" data-viz="spectrum">Spectrum</button>
-                <button class="eq-preset" data-viz="waveform">Waveform</button>
-                <button class="eq-preset" data-viz="circular">Circular</button>
+        <div class="visualizer-controls" role="region" aria-labelledby="viz-heading">
+            <h2 id="viz-heading">Visualizer</h2>
+            <div id="visualizer-presets" role="group" aria-label="Visualizer presets">
+                <button class="eq-preset" data-viz="spectrum" aria-pressed="true">Spectrum</button>
+                <button class="eq-preset" data-viz="waveform" aria-pressed="false">Waveform</button>
+                <button class="eq-preset" data-viz="circular" aria-pressed="false">Circular</button>
             </div>
         </div>
-        <button class="queue-toggle" id="queue-toggle" title="Queue">📋</button>
+        <button class="queue-toggle" id="queue-toggle" aria-label="Toggle queue">📋</button>
     </div>
 
     <!-- Lyrics Panel -->
-    <div class="lyrics-panel" id="lyrics-panel" style="display: none;">
+    <div class="lyrics-panel" id="lyrics-panel" role="dialog" aria-labelledby="lyrics-heading" aria-hidden="true" style="display: none;">
         <div class="lyrics-header">
-            <h3>Lyrics</h3>
-            <button class="close-btn" id="close-lyrics">✕</button>
+            <h2 id="lyrics-heading">Lyrics</h2>
+            <button class="close-btn" id="close-lyrics" aria-label="Close lyrics">✕</button>
         </div>
-        <div class="lyrics-content" id="lyrics-content">
+        <div class="lyrics-content" id="lyrics-content" role="region" aria-label="Lyrics content">
             <div class="no-lyrics">No lyrics available</div>
         </div>
     </div>
 
+</div>
+
+<script>
+document.getElementById('share-btn').addEventListener('click', async () => {
+    const trackTitle = document.getElementById('track-title').textContent;
+    const trackArtist = document.getElementById('track-artist').textContent;
+
+    const shareData = {
+        title: `${trackTitle} by ${trackArtist}`,
+        text: `Check out "${trackTitle}" by ${trackArtist} on Roshan Beats!`,
+        url: window.location.href
+    };
+
+    if (navigator.share) {
+        try {
+            await navigator.share(shareData);
+            console.log('Track shared successfully');
+        } catch (error) {
+            console.log('Share cancelled or failed:', error);
+        }
+    } else {
+        // Fallback: copy to clipboard
+        const shareText = `${shareData.title}\n${shareData.text}\n${shareData.url}`;
+        try {
+            await navigator.clipboard.writeText(shareText);
+            alert('Share link copied to clipboard!');
+        } catch (error) {
+            // Fallback: show share text
+            alert(`Share this:\n\n${shareText}`);
+        }
+    }
+});
+</script>
+</body>
+</html>
     <!-- Queue Panel -->
-    <div class="queue-panel" id="queue-panel" style="display: none;">
+    <div class="queue-panel" id="queue-panel" role="dialog" aria-labelledby="queue-heading" aria-hidden="true" style="display: none;">
         <div class="queue-header">
-            <h3>Queue</h3>
-            <button class="queue-clear" id="clear-queue">Clear</button>
-            <button class="close-btn" id="close-queue">✕</button>
+            <h2 id="queue-heading">Queue</h2>
+            <button class="queue-clear" id="clear-queue" aria-label="Clear queue">Clear</button>
+            <button class="close-btn" id="close-queue" aria-label="Close queue">✕</button>
         </div>
-        <div class="queue-list" id="queue-list">
+        <div class="queue-list" id="queue-list" role="list" aria-label="Playback queue">
             <div class="empty-queue">Queue is empty</div>
         </div>
     </div>
 
     <!-- Sleep Timer -->
-    <div class="sleep-timer" id="sleep-timer-display" style="display: none;">
+    <div class="sleep-timer" id="sleep-timer-display" role="status" aria-live="polite" aria-atomic="true" style="display: none;">
         <span>Sleep in: </span><span id="sleep-countdown">00:00</span>
-        <button id="cancel-sleep">Cancel</button>
+        <button id="cancel-sleep" aria-label="Cancel sleep timer">Cancel</button>
     </div>
 </div>

@@ -269,6 +269,153 @@ class PerformanceMonitor {
         this.metrics = {};
         logger.info('Performance metrics reset');
     }
+
+    // Monitor optimization effectiveness
+    monitorOptimizations() {
+        // Monitor virtual scrolling performance
+        this.monitorVirtualScrolling();
+
+        // Monitor Web Worker performance
+        this.monitorWebWorkers();
+
+        // Monitor memory management
+        this.monitorMemoryManagement();
+
+        // Monitor animation performance
+        this.monitorAnimations();
+
+        // Monitor caching effectiveness
+        this.monitorCaching();
+
+        // Generate optimization report
+        setInterval(() => {
+            this.generateOptimizationReport();
+        }, 60000); // Every minute
+    }
+
+    monitorVirtualScrolling() {
+        // Monitor virtual scrolling performance
+        if (window.virtualScrollerPerfMonitor) {
+            const stats = window.virtualScrollerPerfMonitor.getMetrics();
+            this.recordMetric('VirtualScroll_RenderTime', stats.averageRenderTime);
+            this.recordMetric('VirtualScroll_ItemsRendered', stats.itemsRendered);
+        }
+    }
+
+    monitorWebWorkers() {
+        // Monitor Web Worker performance
+        if (window.workerManager) {
+            const stats = window.workerManager.getStats();
+            this.recordMetric('WebWorkers_Active', stats.activeWorkers);
+            this.recordMetric('WebWorkers_Queued', stats.queuedTasks);
+        }
+    }
+
+    monitorMemoryManagement() {
+        // Monitor memory pool usage
+        if (window.memoryManager) {
+            const stats = window.memoryManager.getMemoryStats();
+            Object.entries(stats.pools).forEach(([poolName, poolStats]) => {
+                this.recordMetric(`MemoryPool_${poolName}_Active`, poolStats.active);
+                this.recordMetric(`MemoryPool_${poolName}_Pooled`, poolStats.pooled);
+            });
+
+            if (stats.memory) {
+                this.recordMetric('Memory_JSHeapUsed', stats.memory.used);
+                this.recordMetric('Memory_JSHeapPressure', stats.memory.pressure ? 1 : 0);
+            }
+        }
+    }
+
+    monitorAnimations() {
+        // Monitor animation frame rate
+        let frameCount = 0;
+        let lastTime = performance.now();
+
+        const measureFPS = () => {
+            frameCount++;
+            const currentTime = performance.now();
+
+            if (currentTime - lastTime >= 1000) {
+                const fps = (frameCount * 1000) / (currentTime - lastTime);
+                this.recordMetric('Animation_FPS', fps);
+                frameCount = 0;
+                lastTime = currentTime;
+            }
+
+            if (window.animationEngine?.isRunning) {
+                requestAnimationFrame(measureFPS);
+            }
+        };
+
+        if (window.animationEngine) {
+            requestAnimationFrame(measureFPS);
+        }
+    }
+
+    monitorCaching() {
+        // Monitor cache hit rates
+        if ('caches' in window) {
+            caches.keys().then(cacheNames => {
+                cacheNames.forEach(cacheName => {
+                    caches.open(cacheName).then(cache => {
+                        // This is a simplified cache monitoring
+                        // In production, you'd track cache hits/misses
+                        this.recordMetric(`Cache_${cacheName.replace(/[^a-zA-Z0-9]/g, '_')}_Size`, 0); // Placeholder
+                    });
+                });
+            });
+        }
+    }
+
+    generateOptimizationReport() {
+        const report = {
+            timestamp: Date.now(),
+            optimizations: {
+                virtualScrolling: this.getAverageMetric('VirtualScroll_RenderTime'),
+                webWorkers: {
+                    active: this.getLatestMetric('WebWorkers_Active')?.value || 0,
+                    queued: this.getLatestMetric('WebWorkers_Queued')?.value || 0
+                },
+                memoryManagement: {
+                    pools: Object.keys(this.metrics).filter(key => key.startsWith('MemoryPool_')).length,
+                    pressure: this.getLatestMetric('Memory_JSHeapPressure')?.value || 0
+                },
+                animations: this.getAverageMetric('Animation_FPS'),
+                caching: Object.keys(this.metrics).filter(key => key.startsWith('Cache_')).length
+            },
+            recommendations: this.generateOptimizationRecommendations()
+        };
+
+        logger.debug('Optimization report generated', report);
+        return report;
+    }
+
+    generateOptimizationRecommendations() {
+        const recommendations = [];
+
+        const avgRenderTime = this.getAverageMetric('VirtualScroll_RenderTime');
+        if (avgRenderTime > 16) { // More than one frame at 60fps
+            recommendations.push('Virtual scrolling render time is high. Consider reducing buffer size or optimizing render function.');
+        }
+
+        const activeWorkers = this.getLatestMetric('WebWorkers_Active')?.value || 0;
+        if (activeWorkers > 4) {
+            recommendations.push('High number of active Web Workers. Consider reducing concurrency or optimizing worker tasks.');
+        }
+
+        const memoryPressure = this.getLatestMetric('Memory_JSHeapPressure')?.value || 0;
+        if (memoryPressure > 0) {
+            recommendations.push('Memory pressure detected. Consider implementing more aggressive cleanup or reducing object pooling.');
+        }
+
+        const fps = this.getAverageMetric('Animation_FPS');
+        if (fps && fps < 50) {
+            recommendations.push('Low animation frame rate detected. Consider reducing animation complexity or using GPU acceleration.');
+        }
+
+        return recommendations;
+    }
 }
 
 // Global performance monitor instance
@@ -283,4 +430,7 @@ if (performanceMonitor.isEnabled) {
     setInterval(() => {
         performanceMonitor.measureMemoryUsage();
     }, 30000); // Every 30 seconds
+
+    // Monitor optimization effectiveness
+    performanceMonitor.monitorOptimizations();
 }

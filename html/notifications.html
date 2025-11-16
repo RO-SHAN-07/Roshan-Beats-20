@@ -1,3 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6750a4">
+  <title>Roshan Beats - Notifications</title>
+  <meta name="description" content="Explore notifications in Roshan Beats, your advanced music player PWA.">
+  <meta name="keywords" content="notifications, music player, Roshan Beats">
+  <link rel="canonical" href="https://roshanbeats.com/html/notifications.html">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/themes.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
 <div id="notifications-screen" class="screen">
     <div class="nav-bar">
         <button class="nav-btn" id="nav-home-notif">🏠 Home</button>
@@ -13,6 +30,21 @@
         <button class="nav-btn" id="nav-settings-notif">⚙️ Settings</button>
     </div>
     <h2>Notifications</h2>
+
+    <!-- Push Notification Settings -->
+    <div class="push-settings">
+        <h3>Push Notifications</h3>
+        <div class="push-status">
+            <span id="push-permission-status">Permission: <span id="permission-text">Unknown</span></span>
+            <span id="push-subscription-status">Status: <span id="subscription-text">Not Subscribed</span></span>
+        </div>
+        <div class="push-controls">
+            <button id="enable-notifications-btn" class="btn-primary">Enable Push Notifications</button>
+            <button id="disable-notifications-btn" class="btn-secondary" disabled>Disable Push Notifications</button>
+            <button id="test-notification-btn" class="btn-secondary" disabled>Send Test Notification</button>
+        </div>
+    </div>
+
     <div class="notification-groups">
         <div class="notification-group">
             <h3>New Releases</h3>
@@ -34,3 +66,73 @@
         </div>
     </div>
 </div>
+
+<script type="module">
+import pushManager from '../js/modules/push-notifications.js';
+
+async function updateNotificationStatus() {
+    const permissionText = document.getElementById('permission-text');
+    const subscriptionText = document.getElementById('subscription-text');
+    const enableBtn = document.getElementById('enable-notifications-btn');
+    const disableBtn = document.getElementById('disable-notifications-btn');
+    const testBtn = document.getElementById('test-notification-btn');
+
+    const permission = pushManager.getPermissionStatus();
+    const isSubscribed = pushManager.isSubscribed();
+
+    permissionText.textContent = permission;
+    subscriptionText.textContent = isSubscribed ? 'Subscribed' : 'Not Subscribed';
+
+    if (permission === 'granted' && isSubscribed) {
+        enableBtn.disabled = true;
+        disableBtn.disabled = false;
+        testBtn.disabled = false;
+    } else if (permission === 'granted') {
+        enableBtn.disabled = false;
+        disableBtn.disabled = true;
+        testBtn.disabled = true;
+    } else {
+        enableBtn.disabled = false;
+        disableBtn.disabled = true;
+        testBtn.disabled = true;
+    }
+}
+
+document.getElementById('enable-notifications-btn').addEventListener('click', async () => {
+    try {
+        await pushManager.requestPermission();
+        await pushManager.subscribe();
+        updateNotificationStatus();
+        alert('Push notifications enabled!');
+    } catch (error) {
+        alert('Failed to enable push notifications: ' + error.message);
+    }
+});
+
+document.getElementById('disable-notifications-btn').addEventListener('click', async () => {
+    try {
+        await pushManager.unsubscribe();
+        updateNotificationStatus();
+        alert('Push notifications disabled!');
+    } catch (error) {
+        alert('Failed to disable push notifications: ' + error.message);
+    }
+});
+
+document.getElementById('test-notification-btn').addEventListener('click', async () => {
+    try {
+        await pushManager.sendTestNotification();
+        alert('Test notification sent!');
+    } catch (error) {
+        alert('Failed to send test notification: ' + error.message);
+    }
+});
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', async () => {
+    await pushManager.init();
+    updateNotificationStatus();
+});
+</script>
+</body>
+</html>

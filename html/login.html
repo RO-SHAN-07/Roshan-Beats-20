@@ -1,16 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6750a4">
+  <title>Roshan Beats - Login</title>
+  <meta name="description" content="Explore login in Roshan Beats, your advanced music player PWA.">
+  <meta name="keywords" content="login, music player, Roshan Beats">
+  <link rel="canonical" href="https://roshanbeats.com/html/login.html">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/themes.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
 <div id="login-screen" class="screen">
     <div class="login-content">
         <h2>Login to Roshan Beats</h2>
+        <div class="auth-options">
+            <button class="biometric-btn" id="biometric-login" aria-label="Login with biometric authentication">
+                <span class="biometric-icon">👆</span>
+                Use Fingerprint/Face ID
+            </button>
+        </div>
+        <div class="divider">
+            <span>or</span>
+        </div>
         <form class="login-form" id="login-form">
-            <input type="email" placeholder="Email" required>
-            <input type="password" placeholder="Password" required>
+            <input type="email" placeholder="Email" required aria-label="Email address">
+            <input type="password" placeholder="Password" required aria-label="Password">
             <button type="submit" class="login-btn">Login</button>
         </form>
         <div class="social-login">
-            <button class="social-btn google-btn" id="google-login">Login with Google</button>
-            <button class="social-btn facebook-btn" id="facebook-login">Login with Facebook</button>
-            <button class="social-btn apple-btn" id="apple-login">Login with Apple</button>
+            <button class="social-btn google-btn" id="google-login" aria-label="Login with Google">Login with Google</button>
+            <button class="social-btn facebook-btn" id="facebook-login" aria-label="Login with Facebook">Login with Facebook</button>
+            <button class="social-btn apple-btn" id="apple-login" aria-label="Login with Apple">Login with Apple</button>
         </div>
         <p>Don't have an account? <a href="#" id="signup-link">Sign up</a></p>
     </div>
 </div>
+
+<script>
+document.getElementById('biometric-login').addEventListener('click', async () => {
+    if (!window.PublicKeyCredential) {
+        alert('WebAuthn not supported in this browser');
+        return;
+    }
+
+    try {
+        // First, check if user has registered biometrics
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+
+        const credentialRequestOptions = {
+            challenge: challenge,
+            allowCredentials: [], // Will be populated if user has registered
+            userVerification: 'preferred',
+        };
+
+        // Try to get existing credential
+        const assertion = await navigator.credentials.get({
+            publicKey: credentialRequestOptions
+        });
+
+        if (assertion) {
+            // Verify the assertion with server
+            console.log('Biometric authentication successful:', assertion);
+            alert('Login successful with biometrics!');
+            // Redirect to home or set logged in state
+            window.location.href = 'home.html';
+        }
+
+    } catch (error) {
+        if (error.name === 'NotAllowedError') {
+            // User hasn't registered biometrics yet, offer to register
+            await registerBiometrics();
+        } else {
+            console.error('Biometric login failed:', error);
+            alert('Biometric login failed: ' + error.message);
+        }
+    }
+});
+
+async function registerBiometrics() {
+    try {
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+
+        const userId = new Uint8Array(16);
+        window.crypto.getRandomValues(userId);
+
+        const publicKeyCredentialCreationOptions = {
+            challenge: challenge,
+            rp: {
+                name: 'Roshan Beats',
+                id: window.location.hostname,
+            },
+            user: {
+                id: userId,
+                name: 'user@roshanbeats.com', // Would be actual user email
+                displayName: 'Roshan Beats User',
+            },
+            pubKeyCredParams: [
+                { alg: -7, type: 'public-key' }, // ES256
+                { alg: -257, type: 'public-key' }, // RS256
+            ],
+            authenticatorSelection: {
+                authenticatorAttachment: 'platform',
+                userVerification: 'preferred',
+                requireResidentKey: false,
+            },
+            timeout: 60000,
+            attestation: 'direct',
+        };
+
+        const credential = await navigator.credentials.create({
+            publicKey: publicKeyCredentialCreationOptions
+        });
+
+        // Send credential to server for storage
+        console.log('Biometric registration successful:', credential);
+
+        alert('Biometric authentication registered! You can now login with fingerprint/face.');
+
+    } catch (error) {
+        console.error('Biometric registration failed:', error);
+        alert('Biometric registration failed: ' + error.message);
+    }
+}
+
+// Handle traditional login form
+document.getElementById('login-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    // Mock login
+    alert('Login successful!');
+    window.location.href = 'home.html';
+});
+
+// Social login placeholders
+document.getElementById('google-login').addEventListener('click', () => {
+    alert('Google login not implemented');
+});
+
+document.getElementById('facebook-login').addEventListener('click', () => {
+    alert('Facebook login not implemented');
+});
+
+document.getElementById('apple-login').addEventListener('click', () => {
+    alert('Apple login not implemented');
+});
+</script>
+</body>
+</html>

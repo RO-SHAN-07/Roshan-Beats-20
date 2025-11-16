@@ -1,3 +1,4 @@
+l
 // Roshan Beats Audio Module using Web Audio API
 
 let audioContext;
@@ -47,6 +48,11 @@ const EQ_PRESETS = {
   classical: [0, 0, 0, 0, 0]
 };
 
+/**
+ * Emits a custom event to all registered listeners
+ * @param {string} event - The event name to emit
+ * @param {*} data - The data to pass to event listeners
+ */
 function emit(event, data) {
   if (eventListeners[event]) {
     eventListeners[event].forEach(callback => callback(data));
@@ -60,6 +66,13 @@ function updateTime() {
   }
 }
 
+/**
+ * Initializes the Web Audio API context and audio processing chain
+ * Sets up gain nodes, analyzers, EQ filters, and media session support
+ * @returns {void}
+ * @emits audioContextSuspended - When audio context is resumed from suspended state
+ * @emits error - When audio initialization fails
+ */
 export function initAudio() {
   try {
     if (!audioContext) {
@@ -204,6 +217,13 @@ function normalizeAudio() {
   }
 }
 
+/**
+ * Starts or resumes audio playback
+ * @param {Object|null} song - Song object to load and play, or null to resume current song
+ * @param {boolean} startFromQueue - Whether this play call is from queue management (affects fade-in)
+ * @returns {void}
+ * @emits play - When playback starts
+ */
 export function play(song = null, startFromQueue = false) {
   if (song) {
     // Load new song
@@ -477,7 +497,60 @@ function getNextSong() {
   } else if (repeatMode === 'all') {
     return queue[0];
   }
+
+  // Auto-play suggestions when queue ends
+  if (autoPlaySimilar && currentSong) {
+    return getAutoPlaySuggestion();
+  }
+
   return null;
+}
+
+function getAutoPlaySuggestion() {
+  // Get similar songs based on current song and listening history
+  const history = getHistory ? getHistory(20) : [];
+  const recentArtists = [...new Set(history.slice(0, 5).map(h => h.artist))];
+  const recentGenres = [...new Set(history.slice(0, 5).map(h => h.genre))];
+
+  // Find songs by same artist or similar genres
+  const allSongs = getSongs ? getSongs() : [];
+  const candidates = allSongs.filter(song => {
+    if (song.id === currentSong.id) return false; // Don't repeat current song
+
+    // Prioritize same artist
+    if (song.artist === currentSong.artist) return true;
+
+    // Then same genre
+    if (song.genre && currentSong.genre && song.genre === currentSong.genre) return true;
+
+    // Then recently played artists/genres
+    if (recentArtists.includes(song.artist)) return true;
+    if (song.genre && recentGenres.includes(song.genre)) return true;
+
+    return false;
+  });
+
+  if (candidates.length === 0) return null;
+
+  // Weight candidates by relevance
+  const weightedCandidates = candidates.map(song => {
+    let score = 1;
+
+    if (song.artist === currentSong.artist) score += 3;
+    if (song.genre === currentSong.genre) score += 2;
+    if (recentArtists.includes(song.artist)) score += 1;
+    if (recentGenres.includes(song.genre)) score += 1;
+
+    // Reduce score for recently played songs
+    const recentPlays = history.filter(h => h.songId === song.id).length;
+    score *= Math.max(0.1, 1 - (recentPlays * 0.3));
+
+    return { song, score };
+  });
+
+  // Sort by score and pick best match
+  weightedCandidates.sort((a, b) => b.score - a.score);
+  return weightedCandidates[0].song;
 }
 
 function getShuffledNextSong() {
@@ -485,12 +558,53 @@ function getShuffledNextSong() {
     shuffleSeed = Math.random();
   }
 
-  // Simple seeded shuffle - in production, use a proper seeded random
-  const availableIndices = queue.map((_, i) => i).filter(i => i !== queueIndex);
-  if (availableIndices.length === 0) return null;
+  // Smart shuffle based on listening history and preferences
+  const availableSongs = queue.filter((_, i) => i !== queueIndex);
+  if (availableSongs.length === 0) return null;
 
-  const randomIndex = Math.floor((shuffleSeed * 1000 + Date.now()) % availableIndices.length);
-  return queue[availableIndices[randomIndex]];
+  // Get listening history to weight shuffle
+  const history = getHistory ? getHistory(50) : [];
+  const playedSongIds = new Set(history.map(h => h.songId));
+
+  // Weight songs based on play frequency and recency
+  const weightedSongs = availableSongs.map((song, index) => {
+    let weight = 1;
+
+    // Reduce weight for recently played songs
+    if (playedSongIds.has(song.id)) {
+      const recentPlays = history.filter(h => h.songId === song.id).length;
+      weight *= Math.max(0.1, 1 - (recentPlays * 0.2)); // Reduce weight for frequently played
+    }
+
+    // Increase weight for songs by favorite artists/genres
+    if (song.artist === currentSong?.artist) {
+      weight *= 1.5; // Prefer same artist
+    }
+
+    // Add some randomness
+    weight *= (0.5 + Math.random());
+
+    return { song, index, weight };
+  });
+
+  // Sort by weight and pick top candidate
+  weightedSongs.sort((a, b) => b.weight - a.weight);
+
+  // Use weighted random selection from top candidates
+  const topCandidates = weightedSongs.slice(0, Math.min(5, weightedSongs.length));
+  const totalWeight = topCandidates.reduce((sum, item) => sum + item.weight, 0);
+  let random = (shuffleSeed * 1000 + Date.now()) % totalWeight;
+
+  for (const item of topCandidates) {
+    random -= item.weight;
+    if (random <= 0) {
+      return item.song;
+    }
+  }
+
+  // Fallback to simple random
+  const randomIndex = Math.floor((shuffleSeed * 1000 + Date.now()) % availableSongs.length);
+  return availableSongs[randomIndex];
 }
 
 // Repeat and Shuffle

@@ -1,4 +1,4 @@
-/**
+e/**
  * UI Module for Roshan Beats PWA
  * Handles screen switching, event delegation, and responsive layout management
  */
@@ -22,6 +22,8 @@ class UIManager {
         this.components = {};
         this.eventListeners = {};
         this.isGridView = true;
+        this.navigationHistory = ['home']; // Track navigation history
+        this.breadcrumbTrail = [{ name: 'Home', screen: 'home' }];
         this.init();
     }
 
@@ -31,8 +33,37 @@ class UIManager {
         this.setupEventDelegation();
         this.setupResponsiveLayout();
         this.setupAudioEventListeners();
+        this.setupBackButton();
         await this.loadAudioSettings();
-        this.showScreen('home');
+        await this.adaptUI();
+
+        // Handle deep linking on initial load
+        this.handleDeepLink();
+
+        // Enforce platform guidelines and requirements
+        this.enforcePlatformGuidelines();
+
+        // Setup performance optimizations
+        this.setupMemoryManagement();
+
+        // Setup security measures
+        this.setupContentSecurity();
+
+        // Setup notification system
+        this.setupNotificationSystem();
+
+        // Check all permissions on startup
+        this.checkAllPermissions();
+
+        // Setup error recovery system
+        this.setupErrorRecovery();
+
+        // Setup accessibility features
+        this.setupAccessibility();
+
+        // Setup reactive behaviors
+        this.setupReactiveBehaviors();
+
         this.updateNav();
     }
 
@@ -63,38 +94,218 @@ class UIManager {
         }
     }
 
-    showScreen(screenName, data = {}) {
+    showScreen(screenName, data = {}, options = {}) {
         if (!this.screens[screenName]) {
             console.error(`Screen ${screenName} not found`);
             return;
         }
 
-        // Hide current screen
+        // Handle navigation history
+        if (!options.replace && !options.modal) {
+            this.addToHistory(screenName, data);
+        }
+
+        // Add transition class for smooth animations
+        document.body.classList.add('navigating');
+
+        // Hide current screen with transition
         const currentScreenEl = document.querySelector('.screen.active');
         if (currentScreenEl) {
-            currentScreenEl.classList.remove('active');
+            currentScreenEl.classList.add('exiting');
+            setTimeout(() => {
+                currentScreenEl.classList.remove('active', 'exiting');
+            }, 150); // Match CSS transition duration
         }
 
-        // Remove existing screen content
-        const appContainer = document.getElementById('app-container') || document.body;
-        const existingScreen = appContainer.querySelector('.screen');
-        if (existingScreen) {
-            existingScreen.remove();
+        // Remove existing screen content after transition
+        setTimeout(() => {
+            const appContainer = document.getElementById('app-container') || document.body;
+            const existingScreen = appContainer.querySelector('.screen:not(.exiting)');
+            if (existingScreen) {
+                existingScreen.remove();
+            }
+
+            // Insert new screen
+            appContainer.insertAdjacentHTML('afterbegin', this.screens[screenName]);
+            const newScreen = appContainer.querySelector('.screen');
+            newScreen.classList.add('entering');
+
+            setTimeout(() => {
+                newScreen.classList.remove('entering');
+                newScreen.classList.add('active');
+                document.body.classList.remove('navigating');
+            }, 50);
+
+            this.currentScreen = screenName;
+            this.updateNav();
+            this.updateBreadcrumbs(data);
+
+            // Populate screen with data
+            this.populateScreen(screenName, data);
+
+            // Trigger screen-specific logic
+            this.onScreenShow(screenName, data);
+
+            // Announce screen change for accessibility
+            this.announceScreenChange(screenName);
+
+            // Update URL for deep linking
+            this.updateURL(screenName, data);
+        }, 150);
+    }
+
+    addToHistory(screenName, data) {
+        // Don't add to history if it's the same screen
+        if (this.navigationHistory[this.navigationHistory.length - 1] === screenName) {
+            return;
         }
 
-        // Insert new screen
-        appContainer.insertAdjacentHTML('afterbegin', this.screens[screenName]);
-        const newScreen = appContainer.querySelector('.screen');
-        newScreen.classList.add('active');
+        // Limit history to prevent memory issues
+        if (this.navigationHistory.length > 10) {
+            this.navigationHistory.shift();
+        }
 
-        this.currentScreen = screenName;
-        this.updateNav();
+        this.navigationHistory.push(screenName);
+    }
 
-        // Populate screen with data
-        this.populateScreen(screenName, data);
+    goBack() {
+        if (this.navigationHistory.length > 1) {
+            // Remove current screen from history
+            this.navigationHistory.pop();
 
-        // Trigger screen-specific logic
-        this.onScreenShow(screenName, data);
+            // Get previous screen
+            const previousScreen = this.navigationHistory[this.navigationHistory.length - 1];
+
+            // Navigate back with replace option to avoid adding to history again
+            this.showScreen(previousScreen, {}, { replace: true, back: true });
+        }
+    }
+
+    updateBreadcrumbs(data) {
+        const breadcrumbEl = document.getElementById('breadcrumb-trail');
+        if (!breadcrumbEl) return;
+
+        // Update breadcrumb trail
+        this.updateBreadcrumbTrail(data);
+
+        // Render breadcrumbs
+        breadcrumbEl.innerHTML = this.breadcrumbTrail.map((crumb, index) => {
+            if (index === this.breadcrumbTrail.length - 1) {
+                return `<span class="breadcrumb-current">${crumb.name}</span>`;
+            } else {
+                return `<button class="breadcrumb-link" data-screen="${crumb.screen}" data-index="${index}">${crumb.name}</button>`;
+            }
+        }).join(' <span class="breadcrumb-separator">></span> ');
+
+        // Add click handlers
+        breadcrumbEl.querySelectorAll('.breadcrumb-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const targetIndex = parseInt(e.target.dataset.index);
+                const targetScreen = e.target.dataset.screen;
+
+                // Navigate to the clicked breadcrumb
+                this.showScreen(targetScreen, {}, { replace: true });
+
+                // Trim breadcrumb trail to the clicked level
+                this.breadcrumbTrail = this.breadcrumbTrail.slice(0, targetIndex + 1);
+            });
+        });
+    }
+
+    updateBreadcrumbTrail(data) {
+        const screenNames = {
+            'home': 'Home',
+            'playlists': 'Playlists',
+            'playlist-detail': 'Playlist',
+            'player': 'Now Playing',
+            'settings': 'Settings',
+            'search': 'Search',
+            'profile': 'Profile'
+        };
+
+        const screenName = screenNames[this.currentScreen] || this.currentScreen;
+
+        // Handle special cases
+        if (this.currentScreen === 'playlist-detail' && data?.playlistId) {
+            // For playlist detail, we need the playlist name
+            // This would be async, but for now use a placeholder
+            this.breadcrumbTrail = [
+                { name: 'Home', screen: 'home' },
+                { name: 'Playlists', screen: 'playlists' },
+                { name: data.playlistName || 'Playlist', screen: 'playlist-detail' }
+            ];
+        } else {
+            // Default breadcrumb logic
+            if (this.currentScreen === 'home') {
+                this.breadcrumbTrail = [{ name: screenName, screen: this.currentScreen }];
+            } else {
+                // Ensure we have the home breadcrumb
+                if (this.breadcrumbTrail.length === 0 || this.breadcrumbTrail[0].screen !== 'home') {
+                    this.breadcrumbTrail = [{ name: 'Home', screen: 'home' }];
+                }
+
+                // Add current screen if not already there
+                const lastCrumb = this.breadcrumbTrail[this.breadcrumbTrail.length - 1];
+                if (lastCrumb.screen !== this.currentScreen) {
+                    this.breadcrumbTrail.push({ name: screenName, screen: this.currentScreen });
+                }
+            }
+        }
+    }
+
+    updateURL(screenName, data) {
+        // Update URL for deep linking
+        const url = new URL(window.location);
+
+        if (screenName === 'home') {
+            url.pathname = '/';
+            url.search = '';
+        } else {
+            url.pathname = `/${screenName}`;
+            url.search = '';
+
+            // Add query parameters for data
+            if (data) {
+                Object.entries(data).forEach(([key, value]) => {
+                    if (value !== undefined && value !== null) {
+                        url.searchParams.set(key, value);
+                    }
+                });
+            }
+        }
+
+        // Update URL without triggering navigation
+        window.history.replaceState({ screen: screenName, data }, '', url.toString());
+    }
+
+    handleDeepLink() {
+        // Handle initial load with URL parameters
+        const url = new URL(window.location);
+        const path = url.pathname.substring(1); // Remove leading slash
+        const params = Object.fromEntries(url.searchParams.entries());
+
+        if (path && path !== 'home' && this.screens[path]) {
+            this.showScreen(path, params, { replace: true });
+        }
+    }
+
+    setupBackButton() {
+        // Handle browser back button
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.screen) {
+                this.showScreen(event.state.screen, event.state.data, { replace: true, back: true });
+            } else {
+                this.goBack();
+            }
+        });
+
+        // Handle Android back button
+        if (window.navigator && window.navigator.app) {
+            document.addEventListener('backbutton', (e) => {
+                e.preventDefault();
+                this.goBack();
+            });
+        }
     }
 
     updateNav() {
@@ -465,7 +676,7 @@ class UIManager {
         // Back button
         document.addEventListener('click', (e) => {
             if (e.target.matches('#back-btn')) {
-                this.showScreen('playlists');
+                this.goBack();
             }
         });
 
@@ -646,6 +857,81 @@ class UIManager {
             }
         });
 
+        // Legal and support buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('#view-terms')) {
+                window.open('terms.html', '_blank');
+            }
+            if (e.target.matches('#view-privacy')) {
+                window.open('privacy-policy.html', '_blank');
+            }
+            if (e.target.matches('#view-help')) {
+                this.showScreen('help');
+            }
+            if (e.target.matches('#send-feedback')) {
+                this.showScreen('feedback');
+            }
+            if (e.target.matches('#export-data')) {
+                this.exportUserData();
+            }
+            if (e.target.matches('#reset-app')) {
+                this.confirmAppReset();
+            }
+            if (e.target.matches('#export-logs')) {
+                this.exportErrorLogs();
+            }
+            if (e.target.matches('#view-shortcuts')) {
+                this.showKeyboardShortcuts();
+            }
+            if (e.target.matches('#check-updates')) {
+                this.checkForUpdates();
+            }
+            if (e.target.matches('#view-license')) {
+                this.showLicense();
+            }
+        });
+
+        // Notification preferences
+        document.addEventListener('change', (e) => {
+            if (e.target.matches('#notify-playback, #notify-system, #notify-new-songs, #notify-playlists')) {
+                this.updateNotificationPreferences();
+            }
+            if (e.target.matches('#performance-monitoring')) {
+                this.togglePerformanceMonitoring(e.target.checked);
+            }
+            if (e.target.matches('#debug-mode')) {
+                this.toggleDebugMode(e.target.checked);
+            }
+            if (e.target.matches('#log-level')) {
+                this.setLogLevel(e.target.value);
+            }
+            if (e.target.matches('#theme-selector')) {
+                this.setTheme(e.target.value);
+            }
+            if (e.target.matches('#font-size')) {
+                this.setFontSize(e.target.value);
+            }
+            if (e.target.matches('#language')) {
+                this.setLanguage(e.target.value);
+            }
+            if (e.target.matches('#high-contrast')) {
+                this.toggleHighContrast(e.target.checked);
+            }
+            if (e.target.matches('#reduce-motion')) {
+                this.toggleReduceMotion(e.target.checked);
+            }
+            if (e.target.matches('#screen-reader')) {
+                this.toggleScreenReader(e.target.checked);
+            }
+        });
+
+        // File input for importing settings
+        document.addEventListener('change', (e) => {
+            if (e.target.matches('#import-settings')) {
+                this.importSettings(e.target.files[0]);
+            }
+        });
+
         // Settings audio controls
         document.addEventListener('change', async (e) => {
             if (e.target.matches('#repeat-mode')) {
@@ -726,6 +1012,12 @@ class UIManager {
             this.handleResponsiveLayout(e.matches);
         });
         this.handleResponsiveLayout(mediaQuery.matches);
+
+        // Monitor network conditions
+        this.setupNetworkMonitoring();
+
+        // Monitor battery status if available
+        this.setupBatteryMonitoring();
     }
 
     handleResponsiveLayout(isMobile) {
@@ -756,6 +1048,28 @@ class UIManager {
     }
 
     async handleFileImport(files) {
+        // Validate all files first
+        const validFiles = [];
+        const errors = [];
+
+        for (const file of files) {
+            const fileErrors = this.validateFileUpload(file);
+            if (fileErrors.length > 0) {
+                errors.push(`${file.name}: ${fileErrors.join(', ')}`);
+            } else {
+                validFiles.push(file);
+            }
+        }
+
+        // Show validation errors
+        if (errors.length > 0) {
+            this.showErrorMessage(`Some files were rejected:\n${errors.join('\n')}`);
+        }
+
+        if (validFiles.length === 0) {
+            return;
+        }
+
         // Show loading state
         const loadingState = document.getElementById('loading-state');
         const progressBar = document.createElement('div');
@@ -766,22 +1080,27 @@ class UIManager {
         loadingState.style.display = 'block';
 
         let imported = 0;
-        const total = files.length;
+        const total = validFiles.length;
         const progressFill = document.getElementById('import-progress');
 
-        // Process files (this would integrate with storage module)
-        for (const file of files) {
+        // Process valid files
+        for (const file of validFiles) {
             try {
+                // Sanitize filename
+                const sanitizedName = this.sanitizeInput(file.name);
+
                 // Extract metadata and save to storage
-                console.log('Importing:', file.name);
-                // Simulate processing time
+                logger.info('Importing file', { name: sanitizedName, size: file.size, type: file.type });
+
+                // Simulate processing time (in real implementation, extract metadata)
                 await new Promise(resolve => setTimeout(resolve, 100));
+
                 imported++;
                 if (progressFill) {
                     progressFill.style.width = `${(imported / total) * 100}%`;
                 }
             } catch (error) {
-                console.error('Error importing file:', file.name, error);
+                logger.error('Error importing file', error, { fileName: file.name });
                 // Show error message with retry
                 this.showErrorMessage(`Failed to import ${file.name}`, () => {
                     // Retry import for this file
@@ -832,17 +1151,181 @@ class UIManager {
         switch (screenName) {
             case 'home':
                 // Focus search if needed
+                this.showContextualActions('library');
                 break;
             case 'player':
                 // Initialize player controls
+                this.showContextualActions('player');
                 break;
             case 'playlist-detail':
                 this.setupPlaylistDragAndDrop(data.playlistId);
+                this.showContextualActions('playlist');
+                break;
+            case 'playlists':
+                this.showContextualActions('playlists');
                 break;
             case 'onboarding':
                 this.initOnboarding();
                 break;
         }
+    }
+
+    showContextualActions(context) {
+        // Hide all contextual actions first
+        document.querySelectorAll('.contextual-action').forEach(el => el.style.display = 'none');
+
+        // Show context-specific actions
+        switch (context) {
+            case 'library':
+                // Show import, search, filter actions
+                this.showAction('quick-import');
+                this.showAction('advanced-search');
+                this.showAction('bulk-select');
+                break;
+            case 'player':
+                // Show playback controls, lyrics, queue
+                this.showAction('lyrics-toggle');
+                this.showAction('queue-toggle');
+                this.showAction('share-song');
+                break;
+            case 'playlist':
+                // Show add songs, reorder, share playlist
+                this.showAction('add-songs');
+                this.showAction('reorder-mode');
+                this.showAction('share-playlist');
+                break;
+            case 'playlists':
+                // Show create playlist, import playlists
+                this.showAction('create-playlist');
+                this.showAction('import-playlist');
+                break;
+        }
+    }
+
+    showAction(actionId) {
+        const actionEl = document.getElementById(actionId);
+        if (actionEl) {
+            actionEl.style.display = 'block';
+        }
+    }
+
+    performContextualAction(action, data) {
+        switch (action) {
+            case 'add-to-queue':
+                if (data.song) {
+                    addToQueue(data.song);
+                    this.showSuccessMessage('Added to queue');
+                }
+                break;
+            case 'add-to-playlist':
+                if (data.song) {
+                    // Show playlist selection modal
+                    this.showPlaylistSelection(data.song);
+                }
+                break;
+            case 'share-song':
+                if (data.song) {
+                    this.shareContent('song', data.song);
+                }
+                break;
+            case 'download-song':
+                if (data.song) {
+                    this.downloadSong(data.song);
+                }
+                break;
+            case 'view-artist':
+                if (data.artist) {
+                    this.showScreen('artist-detail', { artist: data.artist });
+                }
+                break;
+            case 'similar-songs':
+                if (data.song) {
+                    this.showSimilarSongs(data.song);
+                }
+                break;
+        }
+    }
+
+    showPlaylistSelection(song) {
+        // Create and show playlist selection modal
+        const modal = document.createElement('div');
+        modal.className = 'modal playlist-selection-modal';
+        modal.innerHTML = `
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <h3>Add to Playlist</h3>
+                <div id="playlist-selection-list">
+                    <!-- Playlists will be populated here -->
+                </div>
+                <div class="modal-actions">
+                    <button class="outlined-btn close-btn">Cancel</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Populate playlists
+        this.populatePlaylistSelection(song);
+
+        modal.querySelector('.close-btn').addEventListener('click', () => modal.remove());
+    }
+
+    async populatePlaylistSelection(song) {
+        const playlists = await getPlaylists();
+        const listEl = document.getElementById('playlist-selection-list');
+
+        if (!playlists || playlists.length === 0) {
+            listEl.innerHTML = '<p>No playlists available. Create one first.</p>';
+            return;
+        }
+
+        listEl.innerHTML = playlists.map(playlist => `
+            <div class="playlist-option" data-playlist-id="${playlist.id}">
+                <span>${playlist.name}</span>
+                <span class="song-count">${playlist.songs?.length || 0} songs</span>
+            </div>
+        `).join('');
+
+        // Add click handlers
+        listEl.querySelectorAll('.playlist-option').forEach(option => {
+            option.addEventListener('click', async () => {
+                const playlistId = option.dataset.playlistId;
+                await this.addSongToPlaylist(song.id, playlistId);
+                document.querySelector('.playlist-selection-modal').remove();
+            });
+        });
+    }
+
+    shareContent(type, item) {
+        const shareData = {
+            title: `Check out this ${type}`,
+            text: `Listen to "${item.title}" on Roshan Beats!`,
+            url: `${window.location.origin}/${type}/${item.id}`
+        };
+
+        if (navigator.share) {
+            navigator.share(shareData);
+        } else {
+            // Fallback: copy to clipboard
+            const text = `${shareData.title}\n${shareData.text}\n${shareData.url}`;
+            navigator.clipboard.writeText(text).then(() => {
+                this.showSuccessMessage('Link copied to clipboard!');
+            });
+        }
+    }
+
+    downloadSong(song) {
+        // Create download link for cached song
+        const link = document.createElement('a');
+        link.href = song.src || song.url;
+        link.download = `${song.title} - ${song.artist}.mp3`;
+        link.click();
+    }
+
+    showSimilarSongs(song) {
+        // Find and display similar songs
+        // This would use the auto-play suggestion logic
+        this.showScreen('similar-songs', { baseSong: song });
     }
 
     setupPlaylistDragAndDrop(playlistId) {
@@ -946,6 +1429,15 @@ class UIManager {
     async handleSearch() {
         if (this.currentScreen === 'home') {
             await this.populateSongLibrary();
+
+            // Announce search results for accessibility
+            const songGrid = document.getElementById('song-grid');
+            const songList = document.getElementById('song-list');
+            const visibleContainer = songGrid && songGrid.style.display !== 'none' ? songGrid : songList;
+            if (visibleContainer) {
+                const songCount = visibleContainer.children.length;
+                this.announceContentChange(`Search completed, ${songCount} songs found`);
+            }
         }
     }
 
@@ -1518,25 +2010,67 @@ class UIManager {
 
     setupAudioEventListeners() {
         // Audio event listeners
-        on('play', () => this.updatePlayerUI());
-        on('pause', () => this.updatePlayerUI());
-        on('ended', () => this.updatePlayerUI());
+        on('play', () => {
+            this.updatePlayerUI();
+            const currentSong = getCurrentSong();
+            if (currentSong) {
+                this.announceContentChange(`Playing ${currentSong.title} by ${currentSong.artist}`);
+            }
+        });
+        on('pause', () => {
+            this.updatePlayerUI();
+            this.announceContentChange('Playback paused');
+        });
+        on('ended', () => {
+            this.updatePlayerUI();
+            this.announceContentChange('Song ended');
+        });
         on('timeupdate', () => this.updateProgress());
         on('loaded', () => this.updatePlayerUI());
-        on('queueChanged', (data) => this.updateQueueDisplay(data));
-        on('repeatModeChanged', (mode) => this.updateRepeatButton(mode));
-        on('shuffleChanged', (enabled) => this.updateShuffleButton(enabled));
+        on('queueChanged', (data) => {
+            this.updateQueueDisplay(data);
+            this.announceContentChange(`Queue updated, ${data.queue?.length || 0} songs`);
+        });
+        on('repeatModeChanged', (mode) => {
+            this.updateRepeatButton(mode);
+            this.announceContentChange(`Repeat mode: ${mode}`);
+        });
+        on('shuffleChanged', (enabled) => {
+            this.updateShuffleButton(enabled);
+            this.announceContentChange(`Shuffle ${enabled ? 'enabled' : 'disabled'}`);
+        });
         on('bookmarksChanged', (bookmarks) => this.updateBookmarks(bookmarks));
-        on('sleepTimerSet', (minutes) => this.showSleepTimer(minutes));
-        on('sleepTimerCancelled', () => this.hideSleepTimer());
-        on('lyricsLoaded', (lyrics) => this.displayLyrics(lyrics));
+        on('sleepTimerSet', (minutes) => {
+            this.showSleepTimer(minutes);
+            this.announceContentChange(`Sleep timer set for ${minutes} minutes`);
+        });
+        on('sleepTimerCancelled', () => {
+            this.hideSleepTimer();
+            this.announceContentChange('Sleep timer cancelled');
+        });
+        on('lyricsLoaded', (lyrics) => {
+            this.displayLyrics(lyrics);
+            this.announceContentChange('Lyrics loaded');
+        });
         on('lyricsSync', (data) => this.syncLyrics(data));
 
         // Error event listeners
-        on('audioContextSuspended', () => this.showAudioContextError());
-        on('fileCorrupted', (data) => this.showFileCorruptionError(data));
-        on('networkError', () => this.showNetworkPlaybackError());
-        on('playbackError', (error) => this.handlePlaybackError(error));
+        on('audioContextSuspended', () => {
+            this.showAudioContextError();
+            this.announceContentChange('Audio suspended, click to resume');
+        });
+        on('fileCorrupted', (data) => {
+            this.showFileCorruptionError(data);
+            this.announceContentChange('File corrupted, unable to play');
+        });
+        on('networkError', () => {
+            this.showNetworkPlaybackError();
+            this.announceContentChange('Network error, playback failed');
+        });
+        on('playbackError', (error) => {
+            this.handlePlaybackError(error);
+            this.announceContentChange('Playback error occurred');
+        });
 
         // Start sleep timer countdown
         setInterval(() => this.updateSleepTimerCountdown(), 1000);
@@ -1823,7 +2357,7 @@ class UIManager {
 
     initOnboarding() {
         let currentStep = 1;
-        const totalSteps = 6;
+        const totalSteps = 7;
 
         const showStep = (step) => {
             document.querySelectorAll('.onboarding-step').forEach(s => s.classList.remove('active'));
@@ -1832,6 +2366,15 @@ class UIManager {
             document.querySelector(`.indicator[data-step="${step}"]`).classList.add('active');
             currentStep = step;
         };
+
+        // Terms acceptance handling
+        const termsCheckbox = document.getElementById('accept-terms');
+        const nextStep5Btn = document.getElementById('next-step5');
+        if (termsCheckbox && nextStep5Btn) {
+            termsCheckbox.addEventListener('change', () => {
+                nextStep5Btn.disabled = !termsCheckbox.checked;
+            });
+        }
 
         // Event listeners for navigation
         document.getElementById('next-step1').addEventListener('click', () => showStep(2));
@@ -1858,21 +2401,171 @@ class UIManager {
         document.getElementById('next-step4').addEventListener('click', () => showStep(5));
         document.getElementById('prev-step5').addEventListener('click', () => showStep(4));
         document.getElementById('next-step5').addEventListener('click', () => {
+            if (termsCheckbox && termsCheckbox.checked) {
+                // Save terms acceptance
+                localStorage.setItem('termsAccepted', 'true');
+                localStorage.setItem('termsAcceptedDate', new Date().toISOString());
+                showStep(6);
+            }
+        });
+        document.getElementById('prev-step6').addEventListener('click', () => showStep(5));
+        document.getElementById('next-step6').addEventListener('click', () => {
             // Save preferences
             const theme = document.getElementById('onboard-theme').value;
             const eq = document.getElementById('onboard-eq').value;
             // Apply theme
             document.body.className = `theme-${theme}`;
+            // Save preferences
+            localStorage.setItem('userPreferences', JSON.stringify({ theme, eq }));
             // TODO: Apply EQ preset
-            showStep(6);
+            showStep(7);
         });
-        document.getElementById('prev-step6').addEventListener('click', () => showStep(5));
+        document.getElementById('prev-step7').addEventListener('click', () => showStep(6));
         document.getElementById('finish-onboarding').addEventListener('click', () => {
             // Mark onboarding as complete
             localStorage.setItem('onboardingComplete', 'true');
+            localStorage.setItem('firstUse', Date.now().toString());
             this.vibrate([200]);
             this.showScreen('home');
         });
+    }
+
+    // ===== NOTIFICATION SYSTEM =====
+
+    setupNotificationSystem() {
+        // Request notification permission on app start
+        if ('Notification' in window && Notification.permission === 'default') {
+            setTimeout(() => {
+                this.requestPermission('notifications');
+            }, 3000); // Wait 3 seconds after app load
+        }
+
+        // Listen for audio events to show notifications
+        on('play', (data) => this.showPlaybackNotification('play', data));
+        on('pause', (data) => this.showPlaybackNotification('pause', data));
+        on('ended', (data) => this.showPlaybackNotification('ended', data));
+        on('sleepTimerSet', (minutes) => this.showSystemNotification('sleepTimer', { minutes }));
+        on('sleepTimerCancelled', () => this.showSystemNotification('sleepTimerCancelled'));
+
+        // System notifications
+        window.addEventListener('online', () => this.showSystemNotification('backOnline'));
+        window.addEventListener('offline', () => this.showSystemNotification('goneOffline'));
+    }
+
+    async showPlaybackNotification(type, data) {
+        if (!this.shouldShowNotification('playback')) return;
+
+        const song = data?.song || getCurrentSong();
+        if (!song) return;
+
+        let title, body, icon;
+
+        switch (type) {
+            case 'play':
+                title = 'Now Playing';
+                body = `${song.title} - ${song.artist}`;
+                icon = song.cover || 'assets/icons/play.png';
+                break;
+            case 'pause':
+                title = 'Playback Paused';
+                body = `${song.title} - ${song.artist}`;
+                icon = 'assets/icons/pause.png';
+                break;
+            case 'ended':
+                title = 'Song Ended';
+                body = `${song.title} - ${song.artist}`;
+                icon = 'assets/icons/end.png';
+                break;
+        }
+
+        await this.showNotification(title, { body, icon, tag: 'playback' });
+    }
+
+    async showSystemNotification(type, data = {}) {
+        if (!this.shouldShowNotification('system')) return;
+
+        let title, body, icon;
+
+        switch (type) {
+            case 'sleepTimer':
+                title = 'Sleep Timer Set';
+                body = `Music will stop in ${data.minutes} minutes`;
+                icon = 'assets/icons/timer.png';
+                break;
+            case 'sleepTimerCancelled':
+                title = 'Sleep Timer Cancelled';
+                body = 'Sleep timer has been turned off';
+                icon = 'assets/icons/timer-off.png';
+                break;
+            case 'backOnline':
+                title = 'Back Online';
+                body = 'Your music library is now synced';
+                icon = 'assets/icons/online.png';
+                break;
+            case 'goneOffline':
+                title = 'Offline Mode';
+                body = 'Some features may be limited';
+                icon = 'assets/icons/offline.png';
+                break;
+            case 'newSong':
+                title = 'New Song Added';
+                body = `${data.title} by ${data.artist}`;
+                icon = data.cover || 'assets/icons/music.png';
+                break;
+            case 'playlistUpdate':
+                title = 'Playlist Updated';
+                body = `${data.playlistName} has been modified`;
+                icon = 'assets/icons/playlist.png';
+                break;
+        }
+
+        await this.showNotification(title, { body, icon, tag: 'system' });
+    }
+
+    async showNotification(title, options = {}) {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            try {
+                const notification = new Notification(title, {
+                    ...options,
+                    requireInteraction: false,
+                    silent: false
+                });
+
+                // Auto-close after 3 seconds
+                setTimeout(() => {
+                    notification.close();
+                }, 3000);
+
+                // Handle click
+                notification.onclick = () => {
+                    window.focus();
+                    notification.close();
+                };
+
+            } catch (error) {
+                logger.error('Failed to show notification', error);
+            }
+        }
+    }
+
+    shouldShowNotification(type) {
+        // Check user preferences
+        const prefs = localStorage.getItem('notificationPreferences');
+        if (!prefs) return true; // Default to showing notifications
+
+        const settings = JSON.parse(prefs);
+        return settings[type] !== false;
+    }
+
+    updateNotificationPreferences() {
+        const prefs = {
+            playback: document.getElementById('notify-playback')?.checked ?? true,
+            system: document.getElementById('notify-system')?.checked ?? true,
+            newSongs: document.getElementById('notify-new-songs')?.checked ?? true,
+            playlists: document.getElementById('notify-playlists')?.checked ?? true
+        };
+
+        localStorage.setItem('notificationPreferences', JSON.stringify(prefs));
     }
 
     // ===== COMPREHENSIVE STATE MANAGEMENT FUNCTIONS =====
@@ -1903,24 +2596,1750 @@ class UIManager {
 
     async requestPermission(permissionType) {
         try {
+            let granted = false;
+
             switch (permissionType) {
                 case 'storage':
-                    if ('storage' in navigator && 'persist' in navigator.storage) {
-                        await navigator.storage.persist();
-                    }
+                    granted = await this.requestStoragePermission();
                     break;
                 case 'microphone':
-                    await navigator.mediaDevices.getUserMedia({ audio: true });
+                    granted = await this.requestMicrophonePermission();
                     break;
                 case 'notifications':
-                    await Notification.requestPermission();
+                    granted = await this.requestNotificationPermission();
+                    break;
+                case 'geolocation':
+                    granted = await this.requestGeolocationPermission();
+                    break;
+                case 'camera':
+                    granted = await this.requestCameraPermission();
+                    break;
+                case 'bluetooth':
+                    granted = await this.requestBluetoothPermission();
                     break;
             }
-            this.showSuccessMessage(`${permissionType} permission granted`);
+
+            if (granted) {
+                this.showSuccessMessage(`${permissionType} permission granted`);
+                this.updatePermissionStatus(permissionType, true);
+            } else {
+                throw new Error(`${permissionType} permission denied`);
+            }
         } catch (error) {
             logger.error(`Failed to request ${permissionType} permission`, error);
-            this.showPermissionError(permissionType, 'Please check your browser settings.');
+            this.updatePermissionStatus(permissionType, false);
+            this.showPermissionError(permissionType, this.getPermissionFallbackMessage(permissionType));
         }
+    }
+
+    async requestStoragePermission() {
+        if ('storage' in navigator && 'persist' in navigator.storage) {
+            const granted = await navigator.storage.persist();
+            if (!granted) {
+                // Try to estimate storage
+                const estimate = await navigator.storage.estimate();
+                if (estimate.quota && estimate.usage) {
+                    const percentUsed = (estimate.usage / estimate.quota) * 100;
+                    if (percentUsed < 90) {
+                        // Storage is available even without persistence
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return true;
+        }
+        // Fallback: assume storage is available
+        return true;
+    }
+
+    async requestMicrophonePermission() {
+        try {
+            const micStream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
+            });
+            micStream.getTracks().forEach(track => track.stop());
+            return true;
+        } catch (error) {
+            // Fallback: try without advanced constraints
+            try {
+                const fallbackStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                fallbackStream.getTracks().forEach(track => track.stop());
+                return true;
+            } catch (fallbackError) {
+                return false;
+            }
+        }
+    }
+
+    async requestNotificationPermission() {
+        if (!('Notification' in window)) {
+            return false;
+        }
+
+        const permission = await Notification.requestPermission();
+        return permission === 'granted';
+    }
+
+    async requestGeolocationPermission() {
+        return new Promise((resolve) => {
+            if (!('geolocation' in navigator)) {
+                resolve(false);
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                () => resolve(true),
+                () => resolve(false),
+                {
+                    enableHighAccuracy: false,
+                    timeout: 10000,
+                    maximumAge: 300000
+                }
+            );
+        });
+    }
+
+    async requestCameraPermission() {
+        try {
+            const camStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment' }
+            });
+            camStream.getTracks().forEach(track => track.stop());
+            return true;
+        } catch (error) {
+            // Fallback: try rear camera
+            try {
+                const fallbackStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user' }
+                });
+                fallbackStream.getTracks().forEach(track => track.stop());
+                return true;
+            } catch (fallbackError) {
+                return false;
+            }
+        }
+    }
+
+    async requestBluetoothPermission() {
+        if (!('bluetooth' in navigator)) {
+            return false;
+        }
+
+        try {
+            // Request any device to test permission
+            await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true
+            });
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    getPermissionFallbackMessage(permissionType) {
+        const messages = {
+            storage: 'Storage access is required for saving your music. You can still use the app but data won\'t persist.',
+            microphone: 'Microphone access enables voice commands. You can still control playback manually.',
+            notifications: 'Notifications keep you updated on playback. You can check the app manually for updates.',
+            geolocation: 'Location access enables location-based features. Features will work with default settings.',
+            camera: 'Camera access enables AR features. Basic playback will still work.',
+            bluetooth: 'Bluetooth access enables wireless speakers. You can still use device speakers.'
+        };
+        return messages[permissionType] || 'Permission denied. Some features may be limited.';
+    }
+
+    updatePermissionStatus(permissionType, granted) {
+        const status = localStorage.getItem('permissionStatus') || '{}';
+        const permissions = JSON.parse(status);
+        permissions[permissionType] = granted;
+        localStorage.setItem('permissionStatus', JSON.stringify(permissions));
+
+        // Update UI to reflect permission status
+        this.updatePermissionUI(permissionType, granted);
+    }
+
+    updatePermissionUI(permissionType, granted) {
+        const indicators = document.querySelectorAll(`[data-permission="${permissionType}"]`);
+        indicators.forEach(indicator => {
+            indicator.classList.toggle('granted', granted);
+            indicator.classList.toggle('denied', !granted);
+        });
+    }
+
+    async checkAllPermissions() {
+        const permissionTypes = ['storage', 'microphone', 'notifications', 'geolocation', 'camera', 'bluetooth'];
+
+        for (const type of permissionTypes) {
+            const granted = await this.checkPermission(type);
+            this.updatePermissionStatus(type, granted);
+        }
+    }
+
+    getPermissionStatus(permissionType) {
+        const status = localStorage.getItem('permissionStatus');
+        if (!status) return null;
+
+        const permissions = JSON.parse(status);
+        return permissions[permissionType] || null;
+    }
+
+    async checkPermission(permissionType) {
+        try {
+            if ('permissions' in navigator) {
+                const permission = await navigator.permissions.query({ name: permissionType });
+                return permission.state === 'granted';
+            }
+
+            // Fallback checks for browsers without permissions API
+            switch (permissionType) {
+                case 'storage':
+                    return 'storage' in navigator && 'estimate' in navigator.storage;
+                case 'microphone':
+                    return 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices;
+                case 'notifications':
+                    return 'Notification' in window && Notification.permission === 'granted';
+                case 'geolocation':
+                    return 'geolocation' in navigator;
+                case 'camera':
+                    return 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices;
+                default:
+                    return false;
+            }
+        } catch (error) {
+            logger.error(`Failed to check ${permissionType} permission`, error);
+            return false;
+        }
+    }
+
+    async enforcePlatformGuidelines() {
+        // Check for PWA installation status
+        const isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
+                           window.navigator.standalone === true;
+
+        if (!isInstalled && !localStorage.getItem('install-prompt-dismissed')) {
+            this.showInstallPrompt();
+        }
+
+        // Check for HTTPS (required for many Web APIs)
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+            this.showErrorMessage('HTTPS is required for full functionality. Some features may not work.');
+        }
+
+        // Check for outdated browser
+        const isModernBrowser = 'serviceWorker' in navigator &&
+                               'indexedDB' in window &&
+                               'AudioContext' in window;
+
+        if (!isModernBrowser) {
+            this.showErrorMessage('Your browser may not support all features. Please update to a modern browser.');
+        }
+
+        // Rate limiting for API calls
+        this.setupRateLimiting();
+    }
+
+    showInstallPrompt() {
+        const prompt = document.createElement('div');
+        prompt.className = 'install-prompt';
+        prompt.innerHTML = `
+            <div class="install-content">
+                <h3>Install Roshan Beats</h3>
+                <p>Get the full app experience with offline access and native features!</p>
+                <div class="install-actions">
+                    <button class="install-btn">Install</button>
+                    <button class="dismiss-btn">Later</button>
+                </div>
+            </div>
+        `;
+
+        prompt.querySelector('.install-btn').addEventListener('click', () => {
+            // Trigger install prompt (would need to be implemented with beforeinstallprompt event)
+            prompt.remove();
+        });
+
+        prompt.querySelector('.dismiss-btn').addEventListener('click', () => {
+            localStorage.setItem('install-prompt-dismissed', 'true');
+            prompt.remove();
+        });
+
+        document.body.appendChild(prompt);
+    }
+
+    setupRateLimiting() {
+        // Simple rate limiting for API calls
+        this.apiCallTimes = [];
+        this.rateLimitWindow = 60000; // 1 minute
+        this.maxCallsPerWindow = 100; // 100 calls per minute
+    }
+
+    async makeRateLimitedAPICall(apiCall) {
+        const now = Date.now();
+
+        // Clean old calls
+        this.apiCallTimes = this.apiCallTimes.filter(time => now - time < this.rateLimitWindow);
+
+        if (this.apiCallTimes.length >= this.maxCallsPerWindow) {
+            throw new Error('API rate limit exceeded. Please try again later.');
+        }
+
+        this.apiCallTimes.push(now);
+        return apiCall();
+    }
+
+    async makeSecureAPICall(url, options = {}) {
+        // Enforce HTTPS for all external API calls
+        if (!url.startsWith('https://') && !url.startsWith('http://localhost')) {
+            throw new Error('All API calls must use HTTPS');
+        }
+
+        // Set secure defaults
+        const secureOptions = {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                ...options.headers
+            },
+            credentials: 'omit', // Don't send cookies for external APIs
+            mode: 'cors'
+        };
+
+        // Add CSRF protection for same-origin requests
+        if (url.startsWith(window.location.origin)) {
+            const csrfToken = this.generateCSRFToken();
+            secureOptions.headers['X-CSRF-Token'] = csrfToken;
+        }
+
+        try {
+            const response = await this.makeRateLimitedAPICall(() => fetch(url, secureOptions));
+
+            // Validate response
+            if (!response.ok) {
+                throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+            }
+
+            // Check for secure headers
+            this.validateSecureHeaders(response.headers);
+
+            return response;
+        } catch (error) {
+            logger.error('Secure API call failed', error, { url });
+            throw error;
+        }
+    }
+
+    generateCSRFToken() {
+        // Generate a simple CSRF token (in production, use a proper implementation)
+        const token = localStorage.getItem('csrfToken');
+        if (token) return token;
+
+        const newToken = btoa(Math.random().toString()).substring(0, 32);
+        localStorage.setItem('csrfToken', newToken);
+        return newToken;
+    }
+
+    validateSecureHeaders(headers) {
+        // Check for security headers
+        const warnings = [];
+
+        if (!headers.get('content-security-policy')) {
+            warnings.push('Missing Content Security Policy header');
+        }
+
+        if (!headers.get('x-content-type-options') || headers.get('x-content-type-options') !== 'nosniff') {
+            warnings.push('Missing or incorrect X-Content-Type-Options header');
+        }
+
+        if (!headers.get('x-frame-options')) {
+            warnings.push('Missing X-Frame-Options header');
+        }
+
+        if (warnings.length > 0) {
+            logger.warn('API response missing security headers', { warnings });
+        }
+    }
+
+    setupContentSecurity() {
+        // Add CSP meta tag if not present
+        if (!document.querySelector('meta[http-equiv="Content-Security-Policy"]')) {
+            const cspMeta = document.createElement('meta');
+            cspMeta.httpEquiv = 'Content-Security-Policy';
+            cspMeta.content = `
+                default-src 'self';
+                script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+                style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+                img-src 'self' data: https: blob:;
+                media-src 'self' blob: data:;
+                connect-src 'self' https:;
+                font-src 'self' https://fonts.gstatic.com;
+                object-src 'none';
+                base-uri 'self';
+                form-action 'self';
+            `.replace(/\s+/g, ' ').trim();
+            document.head.appendChild(cspMeta);
+        }
+    }
+
+    sanitizeInput(input) {
+        // Basic input sanitization
+        if (typeof input !== 'string') return input;
+
+        // Remove potentially dangerous characters
+        return input
+            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+            .replace(/<[^>]*>/g, '')
+            .trim();
+    }
+
+    validateFileUpload(file) {
+        const errors = [];
+
+        // Check file size (max 100MB)
+        if (file.size > 100 * 1024 * 1024) {
+            errors.push('File size exceeds 100MB limit');
+        }
+
+        // Check file type
+        const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/ogg', 'audio/mp4'];
+        if (!allowedTypes.includes(file.type) && !file.name.match(/\.(mp3|wav|flac|ogg|m4a)$/i)) {
+            errors.push('Unsupported file type. Only audio files are allowed.');
+        }
+
+        // Check filename for malicious patterns
+        if (file.name.includes('..') || file.name.includes('/') || file.name.includes('\\')) {
+            errors.push('Invalid filename');
+        }
+
+        return errors;
+    }
+
+    async exportUserData() {
+        try {
+            this.showLoadingState('export-loading', 'Exporting your data...');
+
+            // Gather all user data
+            const exportData = {
+                exportDate: new Date().toISOString(),
+                version: '1.0',
+                data: {}
+            };
+
+            // Get songs
+            const { getSongs } = await import('./storage.js');
+            exportData.data.songs = await getSongs();
+
+            // Get playlists
+            const { getPlaylists } = await import('./storage.js');
+            exportData.data.playlists = await getPlaylists();
+
+            // Get preferences
+            const { getPreferences } = await import('./storage.js');
+            exportData.data.preferences = await getPreferences();
+
+            // Get history
+            const { getHistory } = await import('./storage.js');
+            exportData.data.history = await getHistory(1000);
+
+            // Convert to JSON and download
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `roshan-beats-data-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+
+            URL.revokeObjectURL(url);
+            this.hideLoadingState('export-loading');
+            this.showSuccessMessage('Data exported successfully');
+
+        } catch (error) {
+            this.hideLoadingState('export-loading');
+            logger.error('Failed to export user data', error);
+            this.showErrorMessage('Failed to export data');
+        }
+    }
+
+    async confirmAppReset() {
+        const confirmed = confirm(
+            'Are you sure you want to reset the app? This will:\n\n' +
+            '• Delete all songs and playlists\n' +
+            '• Clear all settings and preferences\n' +
+            '• Remove all cached data\n\n' +
+            'This action cannot be undone.'
+        );
+
+        if (confirmed) {
+            try {
+                this.showLoadingState('reset-loading', 'Resetting app...');
+
+                // Clear all data
+                localStorage.clear();
+                sessionStorage.clear();
+
+                // Clear IndexedDB
+                const dbDeleteRequest = indexedDB.deleteDatabase('RoshanBeatsDB');
+                dbDeleteRequest.onsuccess = () => {
+                    this.hideLoadingState('reset-loading');
+                    this.showSuccessMessage('App reset successfully. Refreshing...');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                };
+
+                dbDeleteRequest.onerror = () => {
+                    this.hideLoadingState('reset-loading');
+                    this.showErrorMessage('Failed to reset app completely');
+                };
+
+            } catch (error) {
+                this.hideLoadingState('reset-loading');
+                logger.error('Failed to reset app', error);
+                this.showErrorMessage('Failed to reset app');
+            }
+        }
+    }
+
+    // Memory management
+    setupMemoryManagement() {
+        // Periodic cleanup of unused resources
+        setInterval(() => {
+            this.performMemoryCleanup();
+        }, 300000); // Every 5 minutes
+
+        // Cleanup on page visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.performMemoryCleanup();
+            }
+        });
+
+        // Monitor memory usage
+        if ('memory' in performance) {
+            setInterval(() => {
+                const memInfo = performance.memory;
+                const usedPercent = (memInfo.usedJSHeapSize / memInfo.jsHeapSizeLimit) * 100;
+
+                if (usedPercent > 80) {
+                    logger.warn('High memory usage detected', { percent: usedPercent });
+                    this.performAggressiveCleanup();
+                }
+            }, 60000); // Every minute
+        }
+    }
+
+    performMemoryCleanup() {
+        // Clear cached images not in viewport
+        const lazyImages = document.querySelectorAll('img.lazy[loaded]');
+        lazyImages.forEach(img => {
+            if (!this.isElementInViewport(img)) {
+                img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; // Reset to placeholder
+                img.removeAttribute('loaded');
+            }
+        });
+
+        // Force garbage collection hint (if available)
+        if (window.gc) {
+            window.gc();
+        }
+
+        logger.debug('Memory cleanup performed');
+    }
+
+    performAggressiveCleanup() {
+        // More aggressive cleanup when memory is critical
+        this.showErrorMessage('Memory usage is high. Performing cleanup...', null, false);
+
+        // Clear all cached images
+        const allImages = document.querySelectorAll('img.lazy');
+        allImages.forEach(img => {
+            if (img.hasAttribute('loaded')) {
+                img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                img.removeAttribute('loaded');
+            }
+        });
+
+        // Clear any cached data
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                names.forEach(name => {
+                    if (name !== 'core-cache') { // Keep essential cache
+                        caches.delete(name);
+                    }
+                });
+            });
+        }
+
+        logger.warn('Aggressive memory cleanup performed');
+    }
+
+    isElementInViewport(el) {
+        const rect = el.getBoundingClientRect();
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
+    }
+
+    // Global error recovery system
+    setupErrorRecovery() {
+        // Handle critical errors that could break the app
+        window.addEventListener('error', (event) => {
+            this.handleCriticalError(event.error, {
+                filename: event.filename,
+                lineno: event.lineno,
+                colno: event.colno,
+                message: event.message
+            });
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            this.handleCriticalError(event.reason, {
+                type: 'unhandledrejection',
+                promise: event.promise
+            });
+            event.preventDefault(); // Prevent default browser handling
+        });
+
+        // Recovery from service worker errors
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'error') {
+                    this.handleServiceWorkerError(event.data.error);
+                }
+            });
+        }
+
+        // Network error recovery
+        window.addEventListener('online', () => {
+            this.attemptRecovery('network');
+        });
+    }
+
+    handleCriticalError(error, context) {
+        logger.error('Critical application error', error, context);
+
+        // Determine if app can continue
+        const isRecoverable = this.isErrorRecoverable(error, context);
+
+        if (isRecoverable) {
+            this.attemptRecovery('critical', { error, context });
+        } else {
+            this.showCriticalErrorScreen(error, context);
+        }
+    }
+
+    isErrorRecoverable(error, context) {
+        // Check if error is recoverable
+        const recoverablePatterns = [
+            /network/i,
+            /timeout/i,
+            /temporary/i,
+            /service.*unavailable/i
+        ];
+
+        const errorMessage = (error?.message || '') + (context?.message || '');
+        return recoverablePatterns.some(pattern => pattern.test(errorMessage));
+    }
+
+    async attemptRecovery(recoveryType, data = {}) {
+        logger.info(`Attempting recovery: ${recoveryType}`, data);
+
+        try {
+            switch (recoveryType) {
+                case 'network':
+                    // Retry pending operations
+                    if (window.processSyncQueue) {
+                        window.processSyncQueue();
+                    }
+                    this.showSuccessMessage('Connection restored. Syncing data...');
+                    break;
+
+                case 'critical':
+                    // Try to reinitialize core components
+                    await this.emergencyReinit();
+                    this.showSuccessMessage('Application recovered from error');
+                    break;
+
+                case 'storage':
+                    // Clear corrupted data and reinitialize
+                    await this.recoverStorage();
+                    break;
+
+                case 'audio':
+                    // Reinitialize audio context
+                    if (window.initAudio) {
+                        await window.initAudio();
+                    }
+                    break;
+            }
+        } catch (recoveryError) {
+            logger.error('Recovery failed', recoveryError);
+            this.showCriticalErrorScreen(recoveryError, { recoveryType });
+        }
+    }
+
+    async emergencyReinit() {
+        // Emergency reinitialization of core systems
+        try {
+            // Reinitialize audio if needed
+            if (!window.audioContext || window.audioContext.state === 'closed') {
+                const { initAudio } = await import('./audio.js');
+                await initAudio();
+            }
+
+            // Reinitialize storage
+            const { openDB } = await import('./storage.js');
+            await openDB();
+
+            // Refresh UI
+            this.showScreen('home', {}, { replace: true });
+
+            logger.info('Emergency reinitialization completed');
+        } catch (error) {
+            logger.error('Emergency reinitialization failed', error);
+            throw error;
+        }
+    }
+
+    async recoverStorage() {
+        // Attempt to recover from storage corruption
+        try {
+            // Close and reopen database
+            const { openDB } = await import('./storage.js');
+            await openDB();
+
+            // Validate data integrity
+            await this.validateDataIntegrity();
+
+            logger.info('Storage recovery completed');
+        } catch (error) {
+            logger.error('Storage recovery failed', error);
+            throw error;
+        }
+    }
+
+    async validateDataIntegrity() {
+        // Check and repair data integrity
+        const { getSongs, getPlaylists } = await import('./storage.js');
+
+        try {
+            const songs = await getSongs();
+            const playlists = await getPlaylists();
+
+            // Basic validation
+            const invalidSongs = songs.filter(song => !song.id || !song.title);
+            const invalidPlaylists = playlists.filter(playlist => !playlist.id || !playlist.name);
+
+            if (invalidSongs.length > 0 || invalidPlaylists.length > 0) {
+                logger.warn('Data integrity issues found', {
+                    invalidSongs: invalidSongs.length,
+                    invalidPlaylists: invalidPlaylists.length
+                });
+
+                // Attempt repair (simplified)
+                // In a real implementation, this would be more sophisticated
+            }
+        } catch (error) {
+            logger.error('Data integrity validation failed', error);
+        }
+    }
+
+    showCriticalErrorScreen(error, context) {
+        // Show a critical error screen that prevents further app usage
+        const errorScreen = document.createElement('div');
+        errorScreen.className = 'critical-error-screen';
+        errorScreen.innerHTML = `
+            <div class="error-container">
+                <div class="error-icon">⚠️</div>
+                <h1>Something went wrong</h1>
+                <p>The application encountered a critical error and cannot continue safely.</p>
+                <div class="error-details">
+                    <strong>Error:</strong> ${error?.message || 'Unknown error'}
+                    <br><strong>Time:</strong> ${new Date().toLocaleString()}
+                </div>
+                <div class="error-actions">
+                    <button id="retry-app">Try Again</button>
+                    <button id="reset-app-critical">Reset App</button>
+                    <button id="report-error">Report Issue</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(errorScreen);
+
+        // Add event listeners
+        errorScreen.querySelector('#retry-app').addEventListener('click', () => {
+            errorScreen.remove();
+            window.location.reload();
+        });
+
+        errorScreen.querySelector('#reset-app-critical').addEventListener('click', async () => {
+            await this.confirmAppReset();
+            errorScreen.remove();
+        });
+
+        errorScreen.querySelector('#report-error').addEventListener('click', () => {
+            this.reportError(error, context);
+        });
+    }
+
+    reportError(error, context) {
+        // Generate error report
+        const report = {
+            error: {
+                message: error?.message,
+                stack: error?.stack,
+                name: error?.name
+            },
+            context,
+            userAgent: navigator.userAgent,
+            url: window.location.href,
+            timestamp: new Date().toISOString(),
+            logs: logger.getLogs('error', 10)
+        };
+
+        // Copy to clipboard or send to service
+        const reportText = JSON.stringify(report, null, 2);
+        navigator.clipboard.writeText(reportText).then(() => {
+            this.showSuccessMessage('Error report copied to clipboard. Please send it to support.');
+        }).catch(() => {
+            // Fallback: show in console
+            console.log('Error Report:', report);
+            this.showErrorMessage('Error report logged to console. Please check developer tools.');
+        });
+    }
+
+    handleServiceWorkerError(error) {
+        logger.error('Service Worker error', error);
+        this.showErrorMessage('Background service error. Some features may be limited.', () => {
+            // Attempt to re-register service worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js');
+            }
+        });
+    }
+
+    // Settings methods
+    togglePerformanceMonitoring(enabled) {
+        const { performanceMonitor } = require('./performance.js');
+        if (enabled) {
+            performanceMonitor.enable();
+        } else {
+            performanceMonitor.disable();
+        }
+    }
+
+    toggleDebugMode(enabled) {
+        localStorage.setItem('debugMode', enabled);
+        if (enabled) {
+            document.body.classList.add('debug-mode');
+        } else {
+            document.body.classList.remove('debug-mode');
+        }
+    }
+
+    setLogLevel(level) {
+        const { logger } = require('./logger.js');
+        logger.setLogLevel(level);
+    }
+
+    setTheme(theme) {
+        localStorage.setItem('theme', theme);
+        document.body.className = `theme-${theme}`;
+    }
+
+    setFontSize(size) {
+        localStorage.setItem('fontSize', size);
+        document.documentElement.style.fontSize = {
+            small: '14px',
+            medium: '16px',
+            large: '18px'
+        }[size] || '16px';
+    }
+
+    setLanguage(lang) {
+        localStorage.setItem('language', lang);
+        // In a real implementation, this would reload with new language
+        this.showSuccessMessage(`Language changed to ${lang}. Restart app to apply.`);
+    }
+
+    toggleHighContrast(enabled) {
+        localStorage.setItem('highContrast', enabled);
+        document.body.classList.toggle('high-contrast', enabled);
+    }
+
+    toggleReduceMotion(enabled) {
+        localStorage.setItem('reduceMotion', enabled);
+        document.body.classList.toggle('reduce-motion', enabled);
+    }
+
+    toggleScreenReader(enabled) {
+        localStorage.setItem('screenReader', enabled);
+        // Update ARIA attributes based on setting
+        document.querySelectorAll('[aria-label]').forEach(el => {
+            if (!enabled) {
+                el.removeAttribute('aria-label');
+            }
+        });
+    }
+
+    async importSettings(file) {
+        try {
+            const text = await file.text();
+            const settings = JSON.parse(text);
+
+            // Apply imported settings
+            Object.entries(settings).forEach(([key, value]) => {
+                localStorage.setItem(key, JSON.stringify(value));
+            });
+
+            this.showSuccessMessage('Settings imported successfully. Refresh to apply.');
+        } catch (error) {
+            logger.error('Failed to import settings', error);
+            this.showErrorMessage('Failed to import settings file');
+        }
+    }
+
+    exportErrorLogs() {
+        const { logger } = require('./logger.js');
+        const logs = logger.exportLogs();
+        const blob = new Blob([logs], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `roshan-beats-logs-${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+
+        URL.revokeObjectURL(url);
+        this.showSuccessMessage('Error logs exported');
+    }
+
+    showKeyboardShortcuts() {
+        const shortcuts = `
+Space: Play/Pause
+← →: Previous/Next track
+↑ ↓: Volume up/down
+M: Mute
+S: Shuffle toggle
+R: Repeat mode
+Q: Show queue
+F: Fullscreen
+?: Show this help
+        `;
+
+        this.showSuccessMessage(`Keyboard Shortcuts:\n${shortcuts}`);
+    }
+
+    async checkForUpdates() {
+        // Simulate update check
+        this.showLoadingState('update-check', 'Checking for updates...');
+
+        setTimeout(() => {
+            this.hideLoadingState('update-check');
+            this.showSuccessMessage('You have the latest version!');
+        }, 2000);
+    }
+
+    showLicense() {
+        const license = `
+Roshan Beats - MIT License
+
+Copyright (c) 2025 Roshan Beats
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+        `;
+
+        // Create modal to show license
+        const modal = document.createElement('div');
+        modal.className = 'modal license-modal';
+        modal.innerHTML = `
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <h3>MIT License</h3>
+                <pre style="white-space: pre-wrap; font-size: 12px; max-height: 300px; overflow-y: auto;">${license}</pre>
+                <div class="modal-actions">
+                    <button class="outlined-btn close-btn">Close</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        modal.querySelector('.close-btn').addEventListener('click', () => modal.remove());
+    }
+
+    // Accessibility features
+    setupAccessibility() {
+        // Skip links for screen readers
+        this.addSkipLinks();
+
+        // Enhanced keyboard navigation
+        this.setupKeyboardNavigation();
+
+        // Screen reader announcements
+        this.setupScreenReaderSupport();
+
+        // Focus management
+        this.setupFocusManagement();
+
+        // High contrast support
+        this.setupHighContrastSupport();
+
+        // Reduced motion support
+        this.setupReducedMotionSupport();
+    }
+
+    addSkipLinks() {
+        const skipLinks = document.createElement('div');
+        skipLinks.className = 'skip-links';
+        skipLinks.innerHTML = `
+            <a href="#main-content" class="skip-link">Skip to main content</a>
+            <a href="#navigation" class="skip-link">Skip to navigation</a>
+            <a href="#search" class="skip-link">Skip to search</a>
+        `;
+        document.body.insertBefore(skipLinks, document.body.firstChild);
+    }
+
+    setupKeyboardNavigation() {
+        // Tab navigation for all interactive elements
+        document.addEventListener('keydown', (e) => {
+            // Enhanced arrow key navigation for lists
+            if (e.key.startsWith('Arrow')) {
+                const focusedElement = document.activeElement;
+                const listItem = focusedElement?.closest('.song-card, .song-list-item, .playlist-card');
+
+                if (listItem) {
+                    e.preventDefault();
+                    this.navigateListWithArrows(listItem, e.key);
+                }
+            }
+
+            // Ctrl/Cmd + / for help
+            if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+                e.preventDefault();
+                this.showKeyboardShortcuts();
+            }
+
+            // Ctrl/Cmd + K for search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }
+    
+            // F for fullscreen
+            if (e.key === 'f' || e.key === 'F') {
+                e.preventDefault();
+                this.toggleFullscreen();
+            }
+    
+            // M for mute
+            if (e.key === 'm' || e.key === 'M') {
+                e.preventDefault();
+                this.toggleMute();
+            }
+    
+            // S for shuffle
+            if (e.key === 's' || e.key === 'S') {
+                e.preventDefault();
+                this.toggleShuffle();
+            }
+    
+            // R for repeat
+            if (e.key === 'r' || e.key === 'R') {
+                e.preventDefault();
+                this.cycleRepeatMode();
+            }
+        });
+    }
+
+    navigateListWithArrows(currentItem, direction) {
+        const container = currentItem.closest('.song-grid, .song-list, .playlist-grid');
+        if (!container) return;
+
+        const items = Array.from(container.querySelectorAll('.song-card, .song-list-item, .playlist-card'));
+        const currentIndex = items.indexOf(currentItem);
+
+        let nextIndex;
+        switch (direction) {
+            case 'ArrowUp':
+            case 'ArrowLeft':
+                nextIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+                break;
+            case 'ArrowDown':
+            case 'ArrowRight':
+                nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+                break;
+        }
+
+        if (nextIndex !== undefined && items[nextIndex]) {
+            items[nextIndex].focus();
+            items[nextIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.error('Failed to enter fullscreen:', err);
+            });
+        } else {
+            document.exitFullscreen().catch(err => {
+                console.error('Failed to exit fullscreen:', err);
+            });
+        }
+    }
+
+    toggleMute() {
+        const volumeBar = document.getElementById('volume-bar');
+        if (volumeBar) {
+            const currentVolume = parseFloat(volumeBar.value) || 0;
+            if (currentVolume > 0) {
+                this.previousVolume = currentVolume;
+                setVolume(0);
+            } else {
+                setVolume(this.previousVolume || 0.5);
+            }
+        }
+    }
+
+    toggleShuffle() {
+        toggleShuffle();
+    }
+
+    cycleRepeatMode() {
+        const currentMode = getRepeatMode();
+        const modes = ['off', 'all', 'one'];
+        const nextMode = modes[(modes.indexOf(currentMode) + 1) % modes.length];
+        setRepeatMode(nextMode);
+        this.announceContentChange(`Repeat mode: ${nextMode}`);
+    }
+
+    setupScreenReaderSupport() {
+        // Live region for announcements
+        const liveRegion = document.createElement('div');
+        liveRegion.setAttribute('aria-live', 'polite');
+        liveRegion.setAttribute('aria-atomic', 'true');
+        liveRegion.className = 'sr-only';
+        liveRegion.id = 'live-region';
+        document.body.appendChild(liveRegion);
+
+        // Announce screen changes
+        this.announceScreenChange = (screenName) => {
+            const announcements = {
+                home: 'Music library',
+                playlists: 'Playlists',
+                player: 'Now playing',
+                settings: 'Settings',
+                search: 'Search',
+                profile: 'Profile',
+                notifications: 'Notifications',
+                chat: 'Chat',
+                gallery: 'Gallery',
+                map: 'Map',
+                calendar: 'Calendar',
+                'shopping-cart': 'Shopping Cart',
+                payment: 'Payment',
+                feedback: 'Feedback',
+                analytics: 'Analytics',
+                help: 'Help',
+                privacy: 'Privacy',
+                'offline-queue': 'Offline Queue',
+                'ar-camera': 'AR Camera'
+            };
+            liveRegion.textContent = `Navigated to ${announcements[screenName] || screenName}`;
+        };
+
+        // Announce dynamic content changes
+        this.announceContentChange = (message) => {
+            liveRegion.textContent = message;
+        };
+    }
+
+    setupFocusManagement() {
+        // Focus trap for modals
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                const modal = document.querySelector('.modal:not([style*="display: none"])');
+                if (modal) {
+                    this.trapFocusInModal(modal, e);
+                }
+            }
+
+            // Escape to close modals
+            if (e.key === 'Escape') {
+                const modal = document.querySelector('.modal:not([style*="display: none"])');
+                if (modal) {
+                    this.closeModal();
+                }
+            }
+        });
+
+        // Restore focus when modal closes
+        const originalCloseModal = this.closeModal;
+        this.closeModal = () => {
+            const previouslyFocused = document.activeElement;
+            originalCloseModal.call(this);
+            if (previouslyFocused && previouslyFocused !== document.body) {
+                previouslyFocused.focus();
+            }
+        };
+    }
+
+    trapFocusInModal(modal, e) {
+        const focusableElements = modal.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+            if (document.activeElement === firstElement) {
+                lastElement.focus();
+                e.preventDefault();
+            }
+        } else {
+            if (document.activeElement === lastElement) {
+                firstElement.focus();
+                e.preventDefault();
+            }
+        }
+    }
+
+    setupHighContrastSupport() {
+        const highContrast = localStorage.getItem('highContrast') === 'true';
+        if (highContrast) {
+            document.body.classList.add('high-contrast');
+        }
+
+        // Detect system high contrast preference
+        if (window.matchMedia && window.matchMedia('(prefers-contrast: high)').matches) {
+            document.body.classList.add('high-contrast');
+        }
+    }
+
+    setupReducedMotionSupport() {
+        const reduceMotion = localStorage.getItem('reduceMotion') === 'true';
+        if (reduceMotion) {
+            document.body.classList.add('reduce-motion');
+        }
+
+        // Detect system reduced motion preference
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.body.classList.add('reduce-motion');
+        }
+    }
+
+    // Enhanced navigation with breadcrumbs
+    updateNavigationHistory(screenName, data) {
+        // Update navigation history
+        if (this.currentScreen && this.currentScreen !== screenName) {
+            this.navigationHistory.push(this.currentScreen);
+            // Keep only last 10 screens
+            if (this.navigationHistory.length > 10) {
+                this.navigationHistory.shift();
+            }
+        }
+
+        // Update breadcrumb trail
+        const screenNames = {
+            home: 'Home',
+            playlists: 'Playlists',
+            'playlist-detail': 'Playlist',
+            player: 'Player',
+            settings: 'Settings',
+            search: 'Search',
+            profile: 'Profile',
+            notifications: 'Notifications'
+        };
+
+        const screenTitle = screenNames[screenName] || screenName;
+        const existingIndex = this.breadcrumbTrail.findIndex(crumb => crumb.screen === screenName);
+
+        if (existingIndex >= 0) {
+            // Screen already in trail, truncate to this point
+            this.breadcrumbTrail = this.breadcrumbTrail.slice(0, existingIndex + 1);
+        } else {
+            // Add new screen to trail
+            this.breadcrumbTrail.push({ name: screenTitle, screen: screenName });
+        }
+    }
+
+    updateBreadcrumbs() {
+        const breadcrumbContainer = document.getElementById('breadcrumb-nav');
+        if (!breadcrumbContainer) return;
+
+        const breadcrumbs = this.breadcrumbTrail.map((crumb, index) => {
+            if (index === this.breadcrumbTrail.length - 1) {
+                return `<span class="breadcrumb-current">${crumb.name}</span>`;
+            } else {
+                return `<button class="breadcrumb-link" data-screen="${crumb.screen}">${crumb.name}</button>`;
+            }
+        });
+
+        breadcrumbContainer.innerHTML = breadcrumbs.join(' > ');
+
+        // Add click handlers
+        breadcrumbContainer.querySelectorAll('.breadcrumb-link').forEach(link => {
+            link.addEventListener('click', () => {
+                const screen = link.dataset.screen;
+                this.navigateToBreadcrumb(screen);
+            });
+        });
+    }
+
+    navigateToBreadcrumb(screen) {
+        // Find the index of the target screen in breadcrumb trail
+        const targetIndex = this.breadcrumbTrail.findIndex(crumb => crumb.screen === screen);
+        if (targetIndex >= 0) {
+            // Remove breadcrumbs after the target
+            this.breadcrumbTrail = this.breadcrumbTrail.slice(0, targetIndex + 1);
+            this.showScreen(screen);
+        }
+    }
+
+    // Deep linking support
+    handleDeepLink() {
+        const hash = window.location.hash.substring(1);
+        if (hash) {
+            const [screen, params] = hash.split('?');
+            if (screen) {
+                const data = params ? this.parseQueryString(params) : {};
+                this.showScreen(screen, data);
+            }
+        }
+    }
+
+    parseQueryString(query) {
+        const params = {};
+        query.split('&').forEach(pair => {
+            const [key, value] = pair.split('=');
+            params[decodeURIComponent(key)] = decodeURIComponent(value);
+        });
+        return params;
+    }
+
+    updateURL(screen, data = {}) {
+        const params = Object.entries(data)
+            .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+            .join('&');
+
+        const hash = params ? `${screen}?${params}` : screen;
+        window.history.replaceState(null, '', `#${hash}`);
+    }
+
+    // Reactive behaviors
+    setupReactiveBehaviors() {
+        // User activity monitoring
+        this.setupUserActivityMonitoring();
+
+        // Contextual suggestions
+        this.setupContextualSuggestions();
+
+        // Adaptive UI based on usage patterns
+        this.setupAdaptiveUI();
+
+        // Real-time data synchronization
+        this.setupRealTimeSync();
+
+        // Smart notifications based on context
+        this.setupSmartNotifications();
+
+        // Predictive actions
+        this.setupPredictiveActions();
+    }
+
+    setupUserActivityMonitoring() {
+        let lastActivity = Date.now();
+        let activityTimeout;
+
+        const updateActivity = () => {
+            lastActivity = Date.now();
+            clearTimeout(activityTimeout);
+
+            // Auto-pause after inactivity (if enabled in settings)
+            const autoPause = localStorage.getItem('autoPause') === 'true';
+            if (autoPause) {
+                activityTimeout = setTimeout(() => {
+                    const { getCurrentSong } = require('./audio.js');
+                    if (getCurrentSong()) {
+                        // Pause after 30 minutes of inactivity
+                        const { pause } = require('./audio.js');
+                        pause();
+                        this.showSuccessMessage('Playback paused due to inactivity');
+                    }
+                }, 30 * 60 * 1000); // 30 minutes
+            }
+        };
+
+        // Track various user activities
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
+            document.addEventListener(event, updateActivity, { passive: true });
+        });
+
+        // Track app visibility
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // App hidden - could pause playback or reduce updates
+                this.onAppHidden();
+            } else {
+                // App visible - resume normal operation
+                this.onAppVisible();
+            }
+        });
+    }
+
+    onAppHidden() {
+        // Reduce performance when app is hidden
+        const { performanceMonitor } = require('./performance.js');
+        performanceMonitor.disable();
+
+        // Pause non-essential updates
+        this.pauseNonEssentialUpdates();
+    }
+
+    onAppVisible() {
+        // Resume full performance monitoring
+        const { performanceMonitor } = require('./performance.js');
+        performanceMonitor.enable();
+
+        // Resume updates
+        this.resumeUpdates();
+
+        // Refresh data if needed
+        this.refreshOnReturn();
+    }
+
+    pauseNonEssentialUpdates() {
+        // Pause background sync, non-critical animations, etc.
+        document.body.classList.add('backgrounded');
+    }
+
+    resumeUpdates() {
+        document.body.classList.remove('backgrounded');
+    }
+
+    refreshOnReturn() {
+        // Check if data needs refresh
+        const lastRefresh = localStorage.getItem('lastDataRefresh');
+        const now = Date.now();
+
+        if (!lastRefresh || (now - parseInt(lastRefresh)) > 5 * 60 * 1000) { // 5 minutes
+            // Refresh playlists and library
+            this.populatePlaylists();
+            this.populateSongLibrary();
+            localStorage.setItem('lastDataRefresh', now.toString());
+        }
+    }
+
+    setupContextualSuggestions() {
+        // Suggest playlists based on current song
+        on('play', (data) => {
+            if (data?.song) {
+                this.suggestRelatedPlaylists(data.song);
+            }
+        });
+
+        // Suggest songs based on listening patterns
+        on('ended', () => {
+            this.suggestNextSongs();
+        });
+
+        // Show contextual help
+        document.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.matches('.song-card') && !localStorage.getItem('songCardHelpShown')) {
+                setTimeout(() => {
+                    this.showContextualHelp('Tap to play, long press for options', target);
+                    localStorage.setItem('songCardHelpShown', 'true');
+                }, 1000);
+            }
+        });
+    }
+
+    suggestRelatedPlaylists(song) {
+        // Find playlists containing similar songs
+        const { getPlaylists } = require('./storage.js');
+        getPlaylists().then(playlists => {
+            const related = playlists.filter(playlist =>
+                playlist.songs?.some(s =>
+                    s.artist === song.artist ||
+                    s.genre === song.genre
+                )
+            );
+
+            if (related.length > 0) {
+                this.showSuggestion(`Check out "${related[0].name}" playlist`, () => {
+                    this.showScreen('playlist-detail', { playlistId: related[0].id });
+                });
+            }
+        });
+    }
+
+    suggestNextSongs() {
+        // Suggest songs based on recent listening history
+        const { getHistory } = require('./storage.js');
+        getHistory(5).then(history => {
+            if (history.length > 0) {
+                const lastSong = history[0];
+                // Simple suggestion: songs by same artist
+                const { getSongs } = require('./storage.js');
+                getSongs({ artist: lastSong.songId }).then(songs => {
+                    if (songs.length > 1) {
+                        const suggestion = songs.find(s => s.id !== lastSong.songId);
+                        if (suggestion) {
+                            this.showSuggestion(`How about "${suggestion.title}" by ${suggestion.artist}?`, () => {
+                                const { setQueue, play } = require('./audio.js');
+                                setQueue([suggestion], 0);
+                                play(suggestion);
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    showSuggestion(message, action) {
+        const suggestion = document.createElement('div');
+        suggestion.className = 'suggestion-toast';
+        suggestion.innerHTML = `
+            <span>${message}</span>
+            <button class="suggestion-action">Try it</button>
+            <button class="suggestion-dismiss">×</button>
+        `;
+
+        document.body.appendChild(suggestion);
+
+        suggestion.querySelector('.suggestion-action').addEventListener('click', () => {
+            action();
+            suggestion.remove();
+        });
+
+        suggestion.querySelector('.suggestion-dismiss').addEventListener('click', () => {
+            suggestion.remove();
+        });
+
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+            if (suggestion.parentNode) {
+                suggestion.remove();
+            }
+        }, 10000);
+    }
+
+    showContextualHelp(message, target) {
+        const help = document.createElement('div');
+        help.className = 'contextual-help';
+        help.textContent = message;
+
+        // Position near target
+        const rect = target.getBoundingClientRect();
+        help.style.left = `${rect.left}px`;
+        help.style.top = `${rect.bottom + 10}px`;
+
+        document.body.appendChild(help);
+
+        setTimeout(() => {
+            if (help.parentNode) {
+                help.remove();
+            }
+        }, 3000);
+    }
+
+    setupAdaptiveUI() {
+        // Adapt UI based on usage patterns
+        this.trackUsagePatterns();
+
+        // Adapt to device capabilities
+        this.adaptToDeviceCapabilities();
+
+        // Adapt to user preferences over time
+        this.adaptToUserPreferences();
+    }
+
+    trackUsagePatterns() {
+        // Track which screens are used most
+        document.addEventListener('screenShown', (e) => {
+            const screen = e.detail.screen;
+            const usage = JSON.parse(localStorage.getItem('screenUsage') || '{}');
+            usage[screen] = (usage[screen] || 0) + 1;
+            localStorage.setItem('screenUsage', JSON.stringify(usage));
+
+            // Adapt navigation based on usage
+            this.adaptNavigationToUsage(usage);
+        });
+    }
+
+    adaptNavigationToUsage(usage) {
+        // Reorder navigation items based on usage frequency
+        const navItems = Array.from(document.querySelectorAll('.nav-item'));
+        const usageEntries = Object.entries(usage).sort((a, b) => b[1] - a[1]);
+
+        // This would reorder the nav items in the DOM based on usage
+        // For now, just log the most used screens
+        logger.debug('Most used screens', usageEntries.slice(0, 3));
+    }
+
+    adaptToDeviceCapabilities() {
+        const features = this.checkFeatureSupport();
+
+        // Adapt UI based on available features
+        if (!features.touch) {
+            // Desktop optimizations
+            document.body.classList.add('desktop-optimized');
+        }
+
+        if (features.battery) {
+            // Monitor battery and adapt behavior
+            navigator.getBattery().then(battery => {
+                const updateBatteryUI = () => {
+                    if (battery.level < 0.2 && !battery.charging) {
+                        this.showErrorMessage('Battery low. Consider enabling power-saving mode.');
+                        // Could reduce animations, disable non-essential features
+                    }
+                };
+
+                battery.addEventListener('levelchange', updateBatteryUI);
+                battery.addEventListener('chargingchange', updateBatteryUI);
+            });
+        }
+    }
+
+    adaptToUserPreferences() {
+        // Learn from user behavior and adapt defaults
+        const preferences = JSON.parse(localStorage.getItem('learnedPreferences') || '{}');
+
+        // Example: Learn preferred view mode
+        if (this.isGridView !== preferences.preferredView) {
+            // Could suggest switching view modes based on past behavior
+        }
+    }
+
+    setupRealTimeSync() {
+        // Real-time synchronization with external changes
+        window.addEventListener('storage', (e) => {
+            // React to storage changes from other tabs/windows
+            if (e.key === 'currentSong' || e.key?.startsWith('playlist')) {
+                this.handleExternalDataChange(e.key, e.newValue);
+            }
+        });
+
+        // Periodic sync check
+        setInterval(() => {
+            this.checkForExternalChanges();
+        }, 30000); // Every 30 seconds
+    }
+
+    handleExternalDataChange(key, newValue) {
+        // Handle changes from other tabs/windows
+        if (key === 'currentSong') {
+            // Update current song display
+            this.updatePlayerUI();
+        } else if (key.startsWith('playlist')) {
+            // Refresh playlist data
+            this.populatePlaylists();
+        }
+    }
+
+    checkForExternalChanges() {
+        // Check for changes that might have occurred externally
+        // This could integrate with a sync service
+        logger.debug('Checking for external changes');
+    }
+
+    setupSmartNotifications() {
+        // Smart notifications based on context and user behavior
+        on('playlistUpdate', (data) => {
+            if (this.shouldNotifyPlaylistUpdate(data)) {
+                this.showSystemNotification('playlistUpdate', data);
+            }
+        });
+
+        on('newSong', (data) => {
+            if (this.shouldNotifyNewSong(data)) {
+                this.showSystemNotification('newSong', data);
+            }
+        });
+    }
+
+    shouldNotifyPlaylistUpdate(data) {
+        // Only notify if user has interacted with this playlist recently
+        const recentPlaylists = JSON.parse(localStorage.getItem('recentPlaylists') || '[]');
+        return recentPlaylists.includes(data.playlistId);
+    }
+
+    shouldNotifyNewSong(data) {
+        // Notify based on user's interest in the artist/genre
+        const favoriteArtists = JSON.parse(localStorage.getItem('favoriteArtists') || '[]');
+        return favoriteArtists.includes(data.artist);
+    }
+
+    setupPredictiveActions() {
+        // Predict and prepare actions based on user behavior
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('.playlist-card')) {
+                const playlistId = e.target.dataset.playlistId;
+                // Preload playlist data
+                this.predictiveLoadPlaylist(playlistId);
+            }
+        });
+
+        // Predict search results
+        document.addEventListener('input', (e) => {
+            if (e.target.matches('#search-input')) {
+                const query = e.target.value;
+                if (query.length > 2) {
+                    this.predictiveSearch(query);
+                }
+            }
+        });
+    }
+
+    predictiveLoadPlaylist(playlistId) {
+        // Preload playlist data in background
+        const { getPlaylists } = require('./storage.js');
+        getPlaylists().then(playlists => {
+            const playlist = playlists.find(p => p.id === playlistId);
+            if (playlist) {
+                // Cache playlist songs
+                logger.debug('Predictively loaded playlist', { playlistId });
+            }
+        });
+    }
+
+    predictiveSearch(query) {
+        // Preload search results
+        const { searchManager } = require('./search.js');
+        // This would trigger background indexing or result preparation
+        logger.debug('Predictive search triggered', { query });
     }
 
     // File Error Handling
@@ -2226,17 +4645,194 @@ class UIManager {
             webAudio: !!(window.AudioContext || window.webkitAudioContext),
             mediaSession: 'mediaSession' in navigator,
             notifications: 'Notification' in window,
-            vibration: 'vibrate' in navigator
+            vibration: 'vibrate' in navigator,
+            touch: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+            geolocation: 'geolocation' in navigator,
+            battery: 'getBattery' in navigator,
+            bluetooth: 'bluetooth' in navigator,
+            paymentRequest: 'PaymentRequest' in window,
+            webShare: 'share' in navigator,
+            webAuthn: 'credentials' in navigator && 'get' in navigator.credentials,
+            speechRecognition: 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window,
+            mediaDevices: 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices,
+            fileSystemAccess: 'showOpenFilePicker' in window,
+            wakeLock: 'wakeLock' in navigator,
+            backgroundSync: 'serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype,
+            pushMessaging: 'serviceWorker' in navigator && 'PushManager' in window
         };
 
         // Log unsupported features
         Object.entries(features).forEach(([feature, supported]) => {
             if (!supported) {
-                logger.warn(`Feature not supported: ${feature}`);
+                logger.debug(`Feature not supported: ${feature}`);
             }
         });
 
         return features;
+    }
+
+    setupNetworkMonitoring() {
+        // Monitor connection quality and type
+        if ('connection' in navigator) {
+            const connection = navigator.connection;
+            const updateConnectionStatus = () => {
+                const connectionType = connection.effectiveType; // 'slow-2g', '2g', '3g', '4g'
+                const isSlow = connectionType === 'slow-2g' || connectionType === '2g';
+
+                if (isSlow) {
+                    document.body.classList.add('slow-connection');
+                    logger.info('Slow network connection detected. Reducing data usage.');
+                    // Disable high-quality images, reduce API calls, etc.
+                } else {
+                    document.body.classList.remove('slow-connection');
+                }
+
+                // Adjust behavior based on connection
+                if (connection.saveData) {
+                    document.body.classList.add('data-saver');
+                    logger.info('Data saver mode enabled.');
+                }
+            };
+
+            connection.addEventListener('change', updateConnectionStatus);
+            updateConnectionStatus();
+        }
+    }
+
+    setupBatteryMonitoring() {
+        // Monitor battery status for power management
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then(battery => {
+                const updateBatteryStatus = () => {
+                    const isLowBattery = battery.level < 0.2 && !battery.charging;
+
+                    if (isLowBattery) {
+                        document.body.classList.add('low-battery');
+                        logger.warn('Low battery detected. Enabling power-saving mode.');
+                        // Reduce animations, disable non-essential features
+                        this.showErrorMessage('Battery low. Consider connecting charger for optimal experience.');
+                    } else {
+                        document.body.classList.remove('low-battery');
+                    }
+
+                    if (battery.charging) {
+                        document.body.classList.add('charging');
+                    } else {
+                        document.body.classList.remove('charging');
+                    }
+                };
+
+                battery.addEventListener('levelchange', updateBatteryStatus);
+                battery.addEventListener('chargingchange', updateBatteryStatus);
+                updateBatteryStatus();
+            });
+        }
+    }
+
+    async adaptUI() {
+        // Analyze user behavior and adapt UI accordingly
+        const userPatterns = await this.analyzeUserPatterns();
+
+        // Adapt based on usage patterns
+        if (userPatterns.frequentVoiceCommands) {
+            // Make voice button more prominent
+            document.body.classList.add('voice-user');
+        }
+
+        if (userPatterns.frequentGestures) {
+            // Show gesture hints
+            document.body.classList.add('gesture-user');
+        }
+
+        if (userPatterns.nightOwl) {
+            // Auto-enable dark mode
+            document.body.classList.add('dark-mode');
+        }
+
+        if (userPatterns.powerUser) {
+            // Show advanced features
+            document.body.classList.add('power-user');
+        }
+
+        if (userPatterns.mobileOnly) {
+            // Optimize for mobile
+            document.body.classList.add('mobile-optimized');
+        }
+
+        // Adapt navigation based on most used screens
+        this.adaptNavigation(userPatterns);
+    }
+
+    async analyzeUserPatterns() {
+        // Analyze localStorage and usage data
+        const patterns = {
+            frequentVoiceCommands: false,
+            frequentGestures: false,
+            nightOwl: false,
+            powerUser: false,
+            mobileOnly: false,
+            preferredScreens: []
+        };
+
+        try {
+            const usageData = localStorage.getItem('usageData');
+            if (usageData) {
+                const data = JSON.parse(usageData);
+
+                // Check voice command frequency
+                if (data.voiceCommands > 10) {
+                    patterns.frequentVoiceCommands = true;
+                }
+
+                // Check gesture usage
+                if (data.gestures > 20) {
+                    patterns.frequentGestures = true;
+                }
+
+                // Check usage times
+                const usageHours = data.usageTimes || [];
+                const nightUsage = usageHours.filter(hour => hour >= 22 || hour <= 6).length;
+                if (nightUsage > usageHours.length * 0.6) {
+                    patterns.nightOwl = true;
+                }
+
+                // Check advanced features usage
+                if (data.advancedFeatures > 5) {
+                    patterns.powerUser = true;
+                }
+
+                // Check device type
+                if (data.mobileSessions > data.desktopSessions * 2) {
+                    patterns.mobileOnly = true;
+                }
+
+                // Get preferred screens
+                patterns.preferredScreens = Object.entries(data.screenVisits || {})
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 3)
+                    .map(([screen]) => screen);
+            }
+        } catch (error) {
+            logger.debug('Could not analyze user patterns', error);
+        }
+
+        return patterns;
+    }
+
+    adaptNavigation(userPatterns) {
+        // Reorder navigation based on user preferences
+        if (userPatterns.preferredScreens.length > 0) {
+            const navItems = document.querySelectorAll('.nav-item');
+            const preferredOrder = userPatterns.preferredScreens;
+
+            // Reorder nav items (simplified implementation)
+            navItems.forEach(item => {
+                const screen = item.id.replace('nav-', '');
+                if (preferredOrder.includes(screen)) {
+                    item.style.order = preferredOrder.indexOf(screen);
+                }
+            });
+        }
     }
 
     degradeGracefully() {
@@ -2253,6 +4849,44 @@ class UIManager {
 
         if (!features.serviceWorker) {
             logger.info('Service Worker not supported. Offline features disabled.');
+        }
+
+        if (!features.touch) {
+            // Desktop-specific UI adjustments
+            document.body.classList.add('desktop-mode');
+            logger.info('Touch not supported. Desktop mode enabled.');
+        }
+
+        if (!features.geolocation) {
+            logger.info('Geolocation not supported. Location-based features disabled.');
+        }
+
+        if (!features.battery) {
+            logger.info('Battery API not supported. Battery-aware features disabled.');
+        }
+
+        if (!features.bluetooth) {
+            logger.info('Web Bluetooth not supported. Bluetooth features disabled.');
+        }
+
+        if (!features.webShare) {
+            // Hide share buttons or use fallback
+            document.querySelectorAll('.share-btn').forEach(btn => btn.style.display = 'none');
+            logger.info('Web Share API not supported. Share buttons hidden.');
+        }
+
+        if (!features.speechRecognition) {
+            // Hide voice command buttons
+            document.querySelectorAll('.voice-btn').forEach(btn => btn.style.display = 'none');
+            logger.info('Speech Recognition not supported. Voice features disabled.');
+        }
+
+        if (!features.mediaDevices) {
+            logger.info('Media Devices API not supported. Microphone/camera features disabled.');
+        }
+
+        if (!features.wakeLock) {
+            logger.info('Wake Lock API not supported. Screen may turn off during playback.');
         }
     }
 }

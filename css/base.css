@@ -21,6 +21,34 @@ body {
     width: 100vw;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Performance optimizations */
+    contain: layout style paint;
+    will-change: auto;
+}
+
+/* Font loading optimization */
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/roboto-regular.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('assets/fonts/roboto-medium.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/material-icons.woff2') format('woff2');
 }
 
 /* Material Design Typography */
@@ -78,6 +106,9 @@ select:focus {
     padding: 1rem;
     box-sizing: border-box;
     overflow-y: auto;
+    /* Performance optimizations */
+    contain: layout style paint;
+    content-visibility: auto;
 }
 
 .screen.active {
@@ -108,6 +139,23 @@ select:focus {
     flex: 1;
     overflow-y: auto;
     padding: 0 0.5rem;
+}
+
+/* Skip link for accessibility */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: var(--primary);
+    color: var(--on-primary);
+    padding: 8px;
+    text-decoration: none;
+    z-index: 1000;
+    border-radius: 4px;
+}
+
+.skip-link:focus {
+    top: 6px;
 }
 
 /* Utility classes */

@@ -4,7 +4,33 @@
     </header>
     <div class="content-area">
         <div class="settings-section">
+            <h2>Language</h2>
+            <div class="setting-item">
+                <label for="language">Language</label>
+                <select id="language" aria-label="Language selection">
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="zh">中文</option>
+                </select>
+            </div>
+        </div>
+        <div class="settings-section">
             <h2>Theme</h2>
+            <div class="setting-item">
+                <label for="dark-mode">Dark Mode</label>
+                <select id="dark-mode" aria-label="Dark mode setting">
+                    <option value="auto">Auto (System)</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <label for="dark-schedule">Dark Mode Schedule</label>
+                <input type="checkbox" id="dark-schedule" aria-label="Enable dark mode schedule">
+                <span class="help-text">Automatically switch to dark mode at sunset</span>
+            </div>
             <div class="setting-item">
                 <label for="theme-purple">Neon Purple</label>
                 <button class="outlined-btn" id="set-theme-purple">Apply</button>

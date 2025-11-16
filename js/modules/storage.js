@@ -117,23 +117,156 @@ async function checkStorageQuota() {
   }
 }
 
-function saveSong(song) {
-  logger.debug('Saving song', { title: song.title, artist: song.artist });
-  return openDB().then(() => {
+function validateSongData(song) {
+  const errors = [];
+
+  // Required fields
+  if (!song.title || typeof song.title !== 'string' || song.title.trim().length === 0) {
+    errors.push('Song title is required and must be a non-empty string');
+  }
+
+  if (!song.artist || typeof song.artist !== 'string' || song.artist.trim().length === 0) {
+    errors.push('Artist name is required and must be a non-empty string');
+  }
+
+  // Optional but validated fields
+  if (song.album && (typeof song.album !== 'string' || song.album.length > 100)) {
+    errors.push('Album name must be a string with maximum 100 characters');
+  }
+
+  if (song.genre && (typeof song.genre !== 'string' || song.genre.length > 50)) {
+    errors.push('Genre must be a string with maximum 50 characters');
+  }
+
+  if (song.year && (!Number.isInteger(song.year) || song.year < 1900 || song.year > new Date().getFullYear() + 1)) {
+    errors.push('Year must be a valid integer between 1900 and next year');
+  }
+
+  if (song.duration && (!Number.isFinite(song.duration) || song.duration <= 0 || song.duration > 3600)) {
+    errors.push('Duration must be a positive number less than 1 hour');
+  }
+
+  // File size limits (if blob is provided)
+  if (song.blob && song.blob.size > 100 * 1024 * 1024) { // 100MB limit
+    errors.push('Song file size must not exceed 100MB');
+  }
+
+  // URL validation
+  if (song.src && typeof song.src === 'string') {
+    try {
+      new URL(song.src);
+    } catch {
+      errors.push('Song source URL must be a valid URL');
+    }
+  }
+
+  return errors;
+}
+
+async function saveSong(song) {
+    // Validate song data
+    const validationErrors = validateSongData(song);
+    if (validationErrors.length > 0) {
+        const error = new Error('Song validation failed: ' + validationErrors.join(', '));
+        logger.error('Song validation failed', error, { song, errors: validationErrors });
+        throw error;
+    }
+
+    // Check user limits
+    await checkUserLimits('songs');
+
+    logger.debug('Saving song', { title: song.title, artist: song.artist });
+
+    await openDB();
     const transaction = db.transaction(['Songs'], 'readwrite');
     const store = transaction.objectStore('Songs');
+
+    // Add metadata
+    song.dateAdded = song.dateAdded || Date.now();
+    song.lastModified = Date.now();
+
     return new Promise((resolve, reject) => {
-      const request = store.put(song);
-      request.onsuccess = () => {
-        logger.info('Song saved successfully', { songId: request.result });
-        resolve(request.result);
-      };
-      request.onerror = () => {
-        logger.error('Failed to save song', request.error, { song });
-        reject(request.error);
-      };
+        const request = store.put(song);
+        request.onsuccess = () => {
+            logger.info('Song saved successfully', { songId: request.result });
+            uiManager.notifyDataUpdate('songs', { type: 'added', song });
+            resolve(request.result);
+        };
+        request.onerror = () => {
+            logger.error('Failed to save song', request.error, { song });
+            reject(request.error);
+        };
     });
-  });
+}
+
+// Batch save songs for better performance
+async function saveSongsBatch(songs) {
+    if (!songs || songs.length === 0) return [];
+
+    logger.debug('Batch saving songs', { count: songs.length });
+
+    // Validate all songs first
+    const validationErrors = [];
+    songs.forEach((song, index) => {
+        const errors = validateSongData(song);
+        if (errors.length > 0) {
+            validationErrors.push({ index, errors });
+        }
+    });
+
+    if (validationErrors.length > 0) {
+        const error = new Error('Batch validation failed for songs: ' + validationErrors.map(e => `Song ${e.index}: ${e.errors.join(', ')}`).join('; '));
+        logger.error('Batch validation failed', error, { validationErrors });
+        throw error;
+    }
+
+    // Check user limits
+    await checkUserLimits('songs');
+
+    await openDB();
+    const transaction = db.transaction(['Songs'], 'readwrite');
+    const store = transaction.objectStore('Songs');
+
+    const results = [];
+    const errors = [];
+
+    // Process in chunks to avoid overwhelming the transaction
+    const chunkSize = 50;
+    for (let i = 0; i < songs.length; i += chunkSize) {
+        const chunk = songs.slice(i, i + chunkSize);
+
+        for (const song of chunk) {
+            try {
+                // Add metadata
+                song.dateAdded = song.dateAdded || Date.now();
+                song.lastModified = Date.now();
+
+                const request = store.put(song);
+                await new Promise((resolve, reject) => {
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+
+                results.push(request.result);
+            } catch (error) {
+                errors.push({ song: song.title, error });
+            }
+        }
+
+        // Yield control to avoid blocking
+        if (i + chunkSize < songs.length) {
+            await new Promise(resolve => setTimeout(resolve, 0));
+        }
+    }
+
+    if (errors.length > 0) {
+        logger.warn('Some songs failed to save in batch', { errors });
+    }
+
+    logger.info('Batch save completed', { saved: results.length, failed: errors.length });
+    uiManager.notifyDataUpdate('songs', { type: 'batch_added', count: results.length });
+
+    return results;
 }
 
 function getSongs(query = {}, options = {}) {
@@ -210,15 +343,111 @@ function deleteSong(id) {
   });
 }
 
+function validatePlaylistData(name, description, songs) {
+  const errors = [];
+
+  // Required fields
+  if (!name || typeof name !== 'string' || name.trim().length === 0) {
+    errors.push('Playlist name is required and must be a non-empty string');
+  }
+
+  if (name && name.length > 100) {
+    errors.push('Playlist name must not exceed 100 characters');
+  }
+
+  if (description && (typeof description !== 'string' || description.length > 500)) {
+    errors.push('Playlist description must be a string with maximum 500 characters');
+  }
+
+  // Songs validation
+  if (songs && !Array.isArray(songs)) {
+    errors.push('Songs must be an array');
+  }
+
+  if (songs && songs.length > 1000) {
+    errors.push('Playlist cannot contain more than 1000 songs');
+  }
+
+  return errors;
+}
+
+async function checkUserLimits(resourceType) {
+  const limits = {
+    songs: 10000, // Max 10,000 songs
+    playlists: 100, // Max 100 playlists
+    playlistSongs: 1000, // Max 1000 songs per playlist
+    storage: 1024 * 1024 * 1024 // 1GB storage limit
+  };
+
+  try {
+    await openDB();
+    const transaction = db.transaction(['Songs', 'Playlists'], 'readonly');
+
+    if (resourceType === 'songs') {
+      const songStore = transaction.objectStore('Songs');
+      const countRequest = songStore.count();
+      const currentCount = await new Promise((resolve, reject) => {
+        countRequest.onsuccess = () => resolve(countRequest.result);
+        countRequest.onerror = () => reject(countRequest.error);
+      });
+
+      if (currentCount >= limits.songs) {
+        throw new Error(`Song limit exceeded. Maximum ${limits.songs} songs allowed.`);
+      }
+    }
+
+    if (resourceType === 'playlists') {
+      const playlistStore = transaction.objectStore('Playlists');
+      const countRequest = playlistStore.count();
+      const currentCount = await new Promise((resolve, reject) => {
+        countRequest.onsuccess = () => resolve(countRequest.result);
+        countRequest.onerror = () => reject(countRequest.error);
+      });
+
+      if (currentCount >= limits.playlists) {
+        throw new Error(`Playlist limit exceeded. Maximum ${limits.playlists} playlists allowed.`);
+      }
+    }
+
+    // Check storage usage
+    const estimate = await navigator.storage.estimate();
+    if (estimate.usage >= limits.storage) {
+      throw new Error(`Storage limit exceeded. Maximum ${limits.storage / (1024 * 1024 * 1024)}GB allowed.`);
+    }
+
+  } catch (error) {
+    logger.error('User limit check failed', error);
+    throw error;
+  }
+}
+
 function createPlaylist(name, description, songs) {
-  const playlist = { name, description, songs };
-  return openDB().then(() => {
-    const transaction = db.transaction(['Playlists'], 'readwrite');
-    const store = transaction.objectStore('Playlists');
-    return new Promise((resolve, reject) => {
-      const request = store.add(playlist);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+  // Validate playlist data
+  const validationErrors = validatePlaylistData(name, description, songs);
+  if (validationErrors.length > 0) {
+    const error = new Error('Playlist validation failed: ' + validationErrors.join(', '));
+    logger.error('Playlist validation failed', error, { name, description, songs, errors: validationErrors });
+    throw error;
+  }
+
+  // Check user limits
+  return checkUserLimits('playlists').then(() => {
+    const playlist = {
+      name: name.trim(),
+      description: description ? description.trim() : '',
+      songs: songs || [],
+      created: Date.now(),
+      modified: Date.now()
+    };
+
+    return openDB().then(() => {
+      const transaction = db.transaction(['Playlists'], 'readwrite');
+      const store = transaction.objectStore('Playlists');
+      return new Promise((resolve, reject) => {
+        const request = store.add(playlist);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
     });
   });
 }
@@ -700,6 +929,7 @@ async function getDataVersion(storeName) {
 export {
   openDB,
   saveSong,
+  saveSongsBatch,
   getSongs,
   deleteSong,
   createPlaylist,

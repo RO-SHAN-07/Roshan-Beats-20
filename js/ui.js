@@ -364,3 +364,58 @@ showScreen = function(screenId) {
         document.querySelectorAll('.nav-btn:not([id*="nav-ar-camera"])').forEach(btn => btn.classList.remove('active'));
     }
 };
+
+// Dark mode functionality
+function applyDarkMode(mode) {
+    const body = document.body;
+    body.removeAttribute('data-theme-override');
+
+    if (mode === 'light') {
+        body.setAttribute('data-theme-override', 'light');
+    } else if (mode === 'dark') {
+        body.setAttribute('data-theme-override', 'dark');
+    }
+    // 'auto' uses system preference
+}
+
+function checkDarkModeSchedule() {
+    const scheduleEnabled = localStorage.getItem('darkSchedule') === 'true';
+    if (!scheduleEnabled) return;
+
+    const now = new Date();
+    const hour = now.getHours();
+    // Simple schedule: dark mode from 6 PM to 6 AM
+    const isNight = hour >= 18 || hour < 6;
+
+    if (isNight && document.body.getAttribute('data-theme-override') !== 'dark') {
+        applyDarkMode('dark');
+    } else if (!isNight && document.body.getAttribute('data-theme-override') === 'dark') {
+        applyDarkMode('auto');
+    }
+}
+
+// Initialize dark mode on load
+const savedDarkMode = localStorage.getItem('darkMode') || 'auto';
+document.getElementById('dark-mode').value = savedDarkMode;
+applyDarkMode(savedDarkMode);
+
+const scheduleEnabled = localStorage.getItem('darkSchedule') === 'true';
+document.getElementById('dark-schedule').checked = scheduleEnabled;
+
+// Event listeners for dark mode
+document.getElementById('dark-mode').addEventListener('change', (e) => {
+    const mode = e.target.value;
+    localStorage.setItem('darkMode', mode);
+    applyDarkMode(mode);
+});
+
+document.getElementById('dark-schedule').addEventListener('change', (e) => {
+    const enabled = e.target.checked;
+    localStorage.setItem('darkSchedule', enabled);
+    if (enabled) {
+        checkDarkModeSchedule();
+    }
+});
+
+// Check schedule every minute
+setInterval(checkDarkModeSchedule, 60000);

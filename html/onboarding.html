@@ -1,3 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6750a4">
+  <title>Roshan Beats - Onboarding</title>
+  <meta name="description" content="Explore onboarding in Roshan Beats, your advanced music player PWA.">
+  <meta name="keywords" content="onboarding, music player, Roshan Beats">
+  <link rel="canonical" href="https://roshanbeats.com/html/onboarding.html">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/themes.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
 eat<div id="onboarding-screen" class="screen">
     <div class="onboarding-content">
         <div class="onboarding-step active" id="step1">
@@ -62,6 +79,36 @@ eat<div id="onboarding-screen" class="screen">
             <button class="onboard-btn" id="next-step4">Next</button>
         </div>
         <div class="onboarding-step" id="step5">
+            <h2>Privacy & Terms</h2>
+            <p>Please review our terms of service and privacy policy.</p>
+            <div class="terms-content">
+                <div class="terms-scroll">
+                    <h4>Terms of Service</h4>
+                    <p>Roshan Beats provides music playback services. By using this app, you agree to:</p>
+                    <ul>
+                        <li>Use the app for personal, non-commercial purposes</li>
+                        <li>Not upload copyrighted material without permission</li>
+                        <li>Respect intellectual property rights</li>
+                        <li>Use features responsibly</li>
+                    </ul>
+                    <h4>Privacy Policy</h4>
+                    <p>We collect minimal data to provide our services:</p>
+                    <ul>
+                        <li>Music files are stored locally on your device</li>
+                        <li>Usage analytics help improve the app</li>
+                        <li>No personal data is shared without consent</li>
+                        <li>You can delete all data at any time</li>
+                    </ul>
+                </div>
+                <label class="terms-acceptance">
+                    <input type="checkbox" id="accept-terms">
+                    I accept the Terms of Service and Privacy Policy
+                </label>
+            </div>
+            <button class="onboard-btn" id="prev-step5">Back</button>
+            <button class="onboard-btn" id="next-step5" disabled>Next</button>
+        </div>
+        <div class="onboarding-step" id="step6">
             <h2>Set Your Preferences</h2>
             <p>Choose your theme and equalizer settings.</p>
             <div class="preference-options">
@@ -80,13 +127,13 @@ eat<div id="onboarding-screen" class="screen">
                     <option value="classical">Classical</option>
                 </select>
             </div>
-            <button class="onboard-btn" id="prev-step5">Back</button>
-            <button class="onboard-btn" id="next-step5">Next</button>
+            <button class="onboard-btn" id="prev-step6">Back</button>
+            <button class="onboard-btn" id="next-step6">Next</button>
         </div>
-        <div class="onboarding-step" id="step6">
+        <div class="onboarding-step" id="step7">
             <h2>You're All Set!</h2>
             <p>Start listening to your music. Enjoy Roshan Beats!</p>
-            <button class="onboard-btn" id="prev-step6">Back</button>
+            <button class="onboard-btn" id="prev-step7">Back</button>
             <button class="onboard-btn" id="finish-onboarding">Get Started</button>
         </div>
         <div class="step-indicators">
@@ -96,6 +143,9 @@ eat<div id="onboarding-screen" class="screen">
             <span class="indicator" data-step="4"></span>
             <span class="indicator" data-step="5"></span>
             <span class="indicator" data-step="6"></span>
+            <span class="indicator" data-step="7"></span>
         </div>
     </div>
 </div>
+</body>
+</html>

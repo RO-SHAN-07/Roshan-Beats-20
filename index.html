@@ -1,11 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#6750a4">
-    <link rel="manifest" href="manifest.json">
-    <title>Roshan Beats</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6750a4">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; media-src 'self' blob: data:; connect-src 'self' https:; font-src 'self' https://fonts.gstatic.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=(), bluetooth=()">
+  <link rel="manifest" href="manifest.json">
+  <title>Roshan Beats - Advanced Music Player PWA with Offline Support, Playlists, and Audio Visualization</title>
+  <meta name="description" content="Discover Roshan Beats, a progressive web app for streaming and managing your music library. Features include offline playback, customizable playlists, audio equalizer, visualizer, and more.">
+  <meta name="keywords" content="music player, PWA, offline music, playlists, audio visualizer, equalizer, progressive web app, music streaming, audio player, web app">
+  <meta name="author" content="Roshan Beats">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://roshanbeats.com/">
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://roshanbeats.com/">
+  <meta property="og:title" content="Roshan Beats - Advanced Music Player PWA">
+  <meta property="og:description" content="Progressive web app for music streaming with offline support, playlists, and audio visualization.">
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "name": "Roshan Beats",
+        "description": "A progressive web app for streaming and managing your music library with offline support, playlists, audio equalizer, and visualizer.",
+        "url": "https://roshanbeats.com",
+        "applicationCategory": "MusicApplication",
+        "operatingSystem": "Web",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Offline Music Playback",
+          "Custom Playlists",
+          "Audio Equalizer",
+          "Audio Visualizer",
+          "Search Functionality",
+          "Theme Customization",
+          "AR Camera Integration",
+          "Social Features",
+          "Analytics Dashboard"
+        ],
+        "screenshot": "https://roshanbeats.com/assets/images/screenshot.jpg",
+        "author": {
+          "@type": "Organization",
+          "name": "Roshan Beats Team"
+        }
+      },
+      {
+        "@type": "Organization",
+        "name": "Roshan Beats",
+        "url": "https://roshanbeats.com",
+        "logo": "https://roshanbeats.com/assets/images/logo.png",
+        "sameAs": [
+          "https://twitter.com/roshanbeats",
+          "https://facebook.com/roshanbeats"
+        ]
+      },
+      {
+        "@type": "MusicApplication",
+        "name": "Roshan Beats",
+        "description": "Advanced music player with PWA features",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web"
+      }
+    ]
+  }
+  </script>
+  <meta property="og:image" content="https://roshanbeats.com/assets/images/og-image.jpg">
+  <meta property="og:site_name" content="Roshan Beats">
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://roshanbeats.com/">
+  <meta property="twitter:title" content="Roshan Beats - Advanced Music Player PWA">
+  <meta property="twitter:description" content="Progressive web app for music streaming with offline support, playlists, and audio visualization.">
+  <meta property="twitter:image" content="https://roshanbeats.com/assets/images/twitter-image.jpg">
+  <!-- Preload critical resources -->
+  <link rel="preload" href="css/base.css" as="style">
+  <link rel="preload" href="css/themes.css" as="style">
+  <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+  <link rel="dns-prefetch" href="//fonts.googleapis.com">
+  <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/themes.css">
     <link rel="stylesheet" href="css/components.css">
@@ -13,6 +97,8 @@
     <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
+    <!-- Skip to main content link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <!-- Audio element for playback -->
     <audio id="audio" preload="metadata"></audio>
 
@@ -24,11 +110,27 @@
         <!-- Screens will be dynamically loaded here -->
     </div>
 
+    <!-- Progressive enhancement: Basic functionality without JavaScript -->
+    <noscript>
+        <div id="noscript-content" style="padding: 20px; text-align: center; font-family: Arial, sans-serif;">
+            <h1>Roshan Beats</h1>
+            <p>JavaScript is required for the full experience of Roshan Beats.</p>
+            <p>For basic functionality, you can:</p>
+            <ul style="text-align: left; max-width: 400px; margin: 0 auto;">
+                <li>Access the <a href="html/home.html">Home page</a> with basic navigation</li>
+                <li>View <a href="html/help.html">Help documentation</a></li>
+                <li>Read our <a href="html/privacy.html">Privacy Policy</a></li>
+                <li>Check <a href="html/terms.html">Terms of Service</a></li>
+            </ul>
+            <p>Please enable JavaScript to enjoy all features including music playback, playlists, and offline functionality.</p>
+        </div>
+    </noscript>
+
     <!-- Persistent components -->
     <!-- Mini player and navigation are loaded via JavaScript -->
 
     <!-- Fuse.js for search functionality -->
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js" defer></script>
 
     <!-- Service Worker -->
     <script src="sw.js"></script>

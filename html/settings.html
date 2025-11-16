@@ -1,3 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6750a4">
+  <title>Roshan Beats - Settings</title>
+  <meta name="description" content="Explore settings in Roshan Beats, your advanced music player PWA.">
+  <meta name="keywords" content="settings, music player, Roshan Beats">
+  <link rel="canonical" href="https://roshanbeats.com/html/settings.html">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/themes.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
 <div id="settings-screen" class="screen">
     <div class="nav-bar">
         <button class="nav-btn" id="nav-home2">🏠 Home</button>
@@ -133,6 +150,22 @@
             <input type="checkbox" id="push-notifications" checked>
         </div>
         <div class="setting-item">
+            <label>Playback Notifications</label>
+            <input type="checkbox" id="notify-playback" checked>
+        </div>
+        <div class="setting-item">
+            <label>System Alerts</label>
+            <input type="checkbox" id="notify-system" checked>
+        </div>
+        <div class="setting-item">
+            <label>New Song Alerts</label>
+            <input type="checkbox" id="notify-new-songs" checked>
+        </div>
+        <div class="setting-item">
+            <label>Playlist Updates</label>
+            <input type="checkbox" id="notify-playlists" checked>
+        </div>
+        <div class="setting-item">
             <label>Notification Sound</label>
             <select id="notification-sound">
                 <option>Default</option>
@@ -147,4 +180,131 @@
             <input type="checkbox" id="share-data">
         </div>
     </div>
+    <div class="settings-section">
+        <h3>Legal & Support</h3>
+        <div class="setting-item">
+            <label>Terms of Service</label>
+            <button id="view-terms">View</button>
+        </div>
+        <div class="setting-item">
+            <label>Privacy Policy</label>
+            <button id="view-privacy">View</button>
+        </div>
+        <div class="setting-item">
+            <label>Help & Support</label>
+            <button id="view-help">View</button>
+        </div>
+        <div class="setting-item">
+            <label>Send Feedback</label>
+            <button id="send-feedback">Send</button>
+        </div>
+    </div>
+    <div class="settings-section">
+        <h3>Data & Account</h3>
+        <div class="setting-item">
+            <label>Export All Data</label>
+            <button id="export-data">Export</button>
+        </div>
+        <div class="setting-item">
+            <label>Import Settings</label>
+            <input type="file" id="import-settings" accept=".json">
+        </div>
+        <div class="setting-item">
+            <label>Reset App</label>
+            <button id="reset-app" class="danger-btn">Reset</button>
+        </div>
+    </div>
+    <div class="settings-section">
+        <h3>Advanced</h3>
+        <div class="setting-item">
+            <label>Performance Monitoring</label>
+            <input type="checkbox" id="performance-monitoring">
+        </div>
+        <div class="setting-item">
+            <label>Debug Mode</label>
+            <input type="checkbox" id="debug-mode">
+        </div>
+        <div class="setting-item">
+            <label>Log Level</label>
+            <select id="log-level">
+                <option value="error">Errors Only</option>
+                <option value="warn">Warnings</option>
+                <option value="info">Info</option>
+                <option value="debug">Debug</option>
+            </select>
+        </div>
+        <div class="setting-item">
+            <label>Export Error Logs</label>
+            <button id="export-logs">Export Logs</button>
+        </div>
+    </div>
+    <div class="settings-section">
+        <h3>Appearance</h3>
+        <div class="setting-item">
+            <label>Theme</label>
+            <select id="theme-selector">
+                <option value="default">Default</option>
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+                <option value="auto">Auto (System)</option>
+            </select>
+        </div>
+        <div class="setting-item">
+            <label>Font Size</label>
+            <select id="font-size">
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+            </select>
+        </div>
+        <div class="setting-item">
+            <label>Language</label>
+            <select id="language">
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="de">Deutsch</option>
+            </select>
+        </div>
+    </div>
+    <div class="settings-section">
+        <h3>Accessibility</h3>
+        <div class="setting-item">
+            <label>High Contrast Mode</label>
+            <input type="checkbox" id="high-contrast">
+        </div>
+        <div class="setting-item">
+            <label>Reduce Motion</label>
+            <input type="checkbox" id="reduce-motion">
+        </div>
+        <div class="setting-item">
+            <label>Screen Reader Support</label>
+            <input type="checkbox" id="screen-reader" checked>
+        </div>
+        <div class="setting-item">
+            <label>Keyboard Shortcuts</label>
+            <button id="view-shortcuts">View Shortcuts</button>
+        </div>
+    </div>
+    <div class="settings-section">
+        <h3>About</h3>
+        <div class="setting-item">
+            <label>Version</label>
+            <span id="app-version">1.0.0</span>
+        </div>
+        <div class="setting-item">
+            <label>Build Date</label>
+            <span id="build-date">November 16, 2025</span>
+        </div>
+        <div class="setting-item">
+            <label>Check for Updates</label>
+            <button id="check-updates">Check</button>
+        </div>
+        <div class="setting-item">
+            <label>License</label>
+            <button id="view-license">View</button>
+        </div>
+    </div>
 </div>
+</body>
+</html>

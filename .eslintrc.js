@@ -1,0 +1,140 @@
+module.exports = {
+  env: {
+    browser: true,
+    es2021: true,
+    node: true,
+    jest: true
+  },
+  extends: [
+    'eslint:recommended'
+  ],
+  parserOptions: {
+    ecmaVersion: 12,
+    sourceType: 'module'
+  },
+  plugins: [
+    'import',
+    'jsdoc',
+    'security'
+  ],
+  rules: {
+    // Code quality rules
+    'no-console': 'warn',
+    'no-debugger': 'error',
+    'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    'no-var': 'error',
+    'prefer-const': 'error',
+    'prefer-arrow-callback': 'error',
+    'arrow-spacing': 'error',
+    'eqeqeq': ['error', 'always'],
+    'curly': ['error', 'all'],
+    'brace-style': ['error', '1tbs'],
+    'comma-dangle': ['error', 'always-multiline'],
+    'quotes': ['error', 'single'],
+    'semi': ['error', 'always'],
+    'indent': ['error', 2],
+    'linebreak-style': ['error', 'unix'],
+    'max-len': ['error', { code: 120 }],
+    'no-trailing-spaces': 'error',
+    'eol-last': 'error',
+
+    // Security rules
+    'security/detect-object-injection': 'error',
+    'security/detect-non-literal-regexp': 'error',
+    'security/detect-unsafe-regex': 'error',
+    'security/detect-buffer-noassert': 'error',
+    'security/detect-child-process': 'error',
+    'security/detect-disable-mustache-escape': 'error',
+    'security/detect-eval-with-expression': 'error',
+    'security/detect-no-csrf-before-method-override': 'error',
+    'security/detect-non-literal-fs-filename': 'error',
+    'security/detect-possible-timing-attacks': 'error',
+    'security/detect-pseudoRandomBytes': 'error',
+
+    // Import rules
+    'import/no-unresolved': 'error',
+    'import/named': 'error',
+    'import/default': 'error',
+    'import/namespace': 'error',
+    'import/no-absolute-path': 'error',
+    'import/no-dynamic-require': 'error',
+    'import/no-self-import': 'error',
+    'import/no-cycle': 'error',
+    'import/no-useless-path-segments': 'error',
+
+    // JSDoc rules
+    'jsdoc/check-alignment': 'error',
+    'jsdoc/check-examples': 'off',
+    'jsdoc/check-indentation': 'off',
+    'jsdoc/check-param-names': 'error',
+    'jsdoc/check-tag-names': 'error',
+    'jsdoc/check-types': 'error',
+    'jsdoc/implements-on-classes': 'error',
+    'jsdoc/newline-after-description': 'error',
+    'jsdoc/no-undefined-types': 'error',
+    'jsdoc/require-description': 'error',
+    'jsdoc/require-description-complete-sentence': 'error',
+    'jsdoc/require-example': 'off',
+    'jsdoc/require-hyphen-before-param-description': 'error',
+    'jsdoc/require-param': 'error',
+    'jsdoc/require-param-description': 'error',
+    'jsdoc/require-param-name': 'error',
+    'jsdoc/require-param-type': 'error',
+    'jsdoc/require-returns': 'error',
+    'jsdoc/require-returns-check': 'error',
+    'jsdoc/require-returns-description': 'error',
+    'jsdoc/require-returns-type': 'error',
+    'jsdoc/valid-types': 'error',
+
+    // Performance rules
+    'no-loop-func': 'error',
+    'no-new-func': 'error',
+    'no-param-reassign': ['error', { props: true }],
+    'no-return-assign': 'error',
+    'no-return-await': 'error',
+    'no-script-url': 'error',
+    'no-sequences': 'error',
+    'no-throw-literal': 'error',
+    'no-unmodified-loop-condition': 'error',
+    'no-unused-labels': 'error',
+    'no-useless-call': 'error',
+    'no-useless-concat': 'error',
+    'no-useless-escape': 'error',
+    'no-useless-return': 'error',
+    'prefer-promise-reject-errors': 'error',
+    'require-await': 'error',
+    'no-await-in-loop': 'warn',
+
+    // Accessibility rules (custom)
+    'no-alert': 'warn',
+    'no-implied-eval': 'error'
+  },
+  settings: {
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.mjs']
+      }
+    }
+  },
+  overrides: [
+    {
+      files: ['tests/**/*.js'],
+      env: {
+        jest: true
+      },
+      rules: {
+        'no-console': 'off',
+        'jsdoc/require-description': 'off',
+        'jsdoc/require-param-description': 'off',
+        'jsdoc/require-returns-description': 'off'
+      }
+    },
+    {
+      files: ['server.js', 'scripts/**/*.js'],
+      env: {
+        node: true,
+        browser: false
+      }
+    }
+  ]
+};

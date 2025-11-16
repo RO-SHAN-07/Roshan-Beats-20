@@ -1,36 +1,55 @@
-<div id="dashboard-screen" class="screen">
-    <div class="nav-bar">
-        <button class="nav-btn" id="nav-home4">🏠 Home</button>
-        <button class="nav-btn active" id="nav-dashboard">📊 Dashboard</button>
-        <button class="nav-btn" id="nav-profile">👤 Profile</button>
-        <button class="nav-btn" id="nav-search">🔍 Search</button>
-        <button class="nav-btn" id="nav-notifications">🔔 Notifications</button>
-        <button class="nav-btn" id="nav-chat">💬 Chat</button>
-        <button class="nav-btn" id="nav-gallery">🖼️ Gallery</button>
-        <button class="nav-btn" id="nav-analytics">📈 Analytics</button>
-        <button class="nav-btn" id="nav-help">❓ Help</button>
-        <button class="nav-btn" id="nav-privacy">🔒 Privacy</button>
-        <button class="nav-btn" id="nav-offline-queue">📶 Offline Queue</button>
-        <button class="nav-btn" id="nav-ar-camera">📷 AR Camera</button>
-        <button class="nav-btn" id="nav-settings">⚙️ Settings</button>
-    </div>
-    <h2>Dashboard</h2>
-    <div class="dashboard-widgets">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6750a4">
+  <title>Roshan Beats - Dashboard</title>
+  <meta name="description" content="Explore dashboard in Roshan Beats, your advanced music player PWA.">
+  <meta name="keywords" content="dashboard, music player, Roshan Beats">
+  <link rel="canonical" href="https://roshanbeats.com/html/dashboard.html">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/themes.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+<div id="dashboard-screen" class="screen" id="main-content">
+    <nav class="nav-bar" aria-label="Main navigation">
+        <button class="nav-btn" id="nav-home4" aria-label="Home">🏠 Home</button>
+        <button class="nav-btn active" id="nav-dashboard" aria-label="Dashboard">📊 Dashboard</button>
+        <button class="nav-btn" id="nav-profile" aria-label="Profile">👤 Profile</button>
+        <button class="nav-btn" id="nav-search" aria-label="Search">🔍 Search</button>
+        <button class="nav-btn" id="nav-notifications" aria-label="Notifications">🔔 Notifications</button>
+        <button class="nav-btn" id="nav-chat" aria-label="Chat">💬 Chat</button>
+        <button class="nav-btn" id="nav-gallery" aria-label="Gallery">🖼️ Gallery</button>
+        <button class="nav-btn" id="nav-analytics" aria-label="Analytics">📈 Analytics</button>
+        <button class="nav-btn" id="nav-help" aria-label="Help">❓ Help</button>
+        <button class="nav-btn" id="nav-privacy" aria-label="Privacy">🔒 Privacy</button>
+        <button class="nav-btn" id="nav-offline-queue" aria-label="Offline Queue">📶 Offline Queue</button>
+        <button class="nav-btn" id="nav-ar-camera" aria-label="AR Camera">📷 AR Camera</button>
+        <button class="nav-btn" id="nav-settings" aria-label="Settings">⚙️ Settings</button>
+    </nav>
+    <h1 id="dashboard-heading">Dashboard</h1>
+    <div class="dashboard-widgets" role="region" aria-labelledby="dashboard-heading">
         <div class="widget">
-            <h3>Total Songs</h3>
+            <h2>Total Songs</h2>
             <p id="total-songs">0</p>
         </div>
         <div class="widget">
-            <h3>Playlists</h3>
+            <h2>Playlists</h2>
             <p id="total-playlists">0</p>
         </div>
         <div class="widget">
-            <h3>Listening Time</h3>
+            <h2>Listening Time</h2>
             <p id="listening-time">0 min</p>
         </div>
         <div class="widget">
-            <h3>Favorite Genre</h3>
+            <h2>Favorite Genre</h2>
             <p id="favorite-genre">N/A</p>
         </div>
     </div>
 </div>
+</body>
+</html>

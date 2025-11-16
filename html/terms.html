@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - Roshan Beats</title>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+</head>
+<body>
+    <div id="app-container">
+        <div class="screen active" id="terms-screen">
+            <header class="screen-header">
+                <button id="back-btn" class="back-button" aria-label="Go back">←</button>
+                <h1>Terms of Service</h1>
+            </header>
+
+            <div class="content">
+                <div class="terms-content">
+                    <div class="terms-meta">
+                        <p><strong>Last updated:</strong> <span id="last-updated">November 16, 2025</span></p>
+                        <p><strong>Effective date:</strong> <span id="effective-date">November 16, 2025</span></p>
+                    </div>
+
+                    <div class="terms-body">
+                        <h2>1. Acceptance of Terms</h2>
+                        <p>By accessing and using Roshan Beats ("the App"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.</p>
+
+                        <h2>2. Use License</h2>
+                        <p>Permission is granted to temporarily use the App for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:</p>
+                        <ul>
+                            <li>modify or copy the materials</li>
+                            <li>use the materials for any commercial purpose or for any public display</li>
+                            <li>attempt to decompile or reverse engineer any software contained in the App</li>
+                            <li>remove any copyright or other proprietary notations from the materials</li>
+                        </ul>
+
+                        <h2>3. Content and Intellectual Property</h2>
+                        <p>The App allows you to upload and store your own music files. You retain ownership of your content. However, by using the App, you grant us a limited license to store, process, and display your content as necessary for the service.</p>
+                        <p>You may not upload copyrighted material without proper authorization. The App is not responsible for any copyright infringement claims arising from user-uploaded content.</p>
+
+                        <h2>4. User Responsibilities</h2>
+                        <p>As a user of Roshan Beats, you agree to:</p>
+                        <ul>
+                            <li>Use the App only for lawful purposes</li>
+                            <li>Not upload malicious files or content</li>
+                            <li>Respect intellectual property rights</li>
+                            <li>Not attempt to circumvent any security measures</li>
+                            <li>Report any bugs or security issues promptly</li>
+                        </ul>
+
+                        <h2>5. Privacy and Data</h2>
+                        <p>Your privacy is important to us. Please review our Privacy Policy, which also governs your use of the App, to understand our practices.</p>
+
+                        <h2>6. Service Availability</h2>
+                        <p>While we strive to provide continuous service, we do not guarantee that the App will be available at all times. We reserve the right to modify or discontinue the service with notice.</p>
+
+                        <h2>7. Limitation of Liability</h2>
+                        <p>In no event shall Roshan Beats or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the App.</p>
+
+                        <h2>8. Termination</h2>
+                        <p>We may terminate or suspend your account and access to the App immediately, without prior notice, for any reason, including breach of these Terms.</p>
+
+                        <h2>9. Changes to Terms</h2>
+                        <p>We reserve the right to modify these terms at any time. Continued use of the App after changes constitutes acceptance of the new terms.</p>
+
+                        <h2>10. Governing Law</h2>
+                        <p>These terms shall be interpreted and governed by the laws of the jurisdiction in which the service is provided.</p>
+
+                        <h2>11. Contact Information</h2>
+                        <p>If you have any questions about these Terms of Service, please contact us through the app's feedback system.</p>
+                    </div>
+
+                    <div class="terms-actions">
+                        <button id="accept-terms-btn" class="primary-btn">I Accept</button>
+                        <button id="decline-terms-btn" class="secondary-btn">I Decline</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { uiManager } from '../js/modules/ui.js';
+
+        // Handle terms acceptance
+        document.getElementById('accept-terms-btn').addEventListener('click', () => {
+            localStorage.setItem('termsAccepted', 'true');
+            localStorage.setItem('termsAcceptedDate', new Date().toISOString());
+            uiManager.goBack();
+            uiManager.showSuccessMessage('Terms accepted successfully');
+        });
+
+        document.getElementById('decline-terms-btn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to decline? This will prevent you from using the app.')) {
+                // Clear user data and redirect
+                localStorage.clear();
+                indexedDB.deleteDatabase('RoshanBeatsDB');
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body>
+</html>

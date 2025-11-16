@@ -168,6 +168,177 @@
     }
 }
 
+/* Browser-specific fixes */
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+@supports (-webkit-appearance: none) {
+    /* Fix input styling in Webkit */
+    input[type="search"] {
+        -webkit-appearance: none;
+        border-radius: 0;
+    }
+
+    /* Fix audio element styling */
+    audio {
+        -webkit-appearance: none;
+        height: 40px;
+    }
+
+    /* Fix scrollbar styling */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--surface-variant);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--outline);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--outline-variant);
+    }
+}
+
+/* Firefox-specific fixes */
+@-moz-document url-prefix() {
+    /* Fix Firefox input styling */
+    input[type="search"] {
+        -moz-appearance: none;
+        border-radius: 0;
+    }
+
+    /* Fix Firefox scrollbar */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--outline) var(--surface-variant);
+    }
+
+    /* Fix Firefox audio controls */
+    audio {
+        height: 40px;
+    }
+}
+
+/* Edge-specific fixes */
+@supports (-ms-ime-align: auto) {
+    /* Fix Edge input styling */
+    input[type="search"] {
+        border-radius: 0;
+    }
+
+    /* Fix Edge audio controls */
+    audio::-webkit-media-controls-panel {
+        background-color: var(--surface);
+    }
+}
+
+/* Safari-specific fixes */
+@supports (-webkit-hyphens: none) {
+    /* Fix Safari flexbox bugs */
+    .flex-container {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+    }
+
+    /* Fix Safari input zoom on iOS */
+    @media screen and (max-width: 767px) {
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="search"],
+        textarea,
+        select {
+            font-size: 16px !important;
+        }
+    }
+}
+
+/* Chrome-specific fixes */
+@supports (-webkit-box-shadow: 0 0 0 0) and (not (-moz-appearance: none)) {
+    /* Fix Chrome autofill styling */
+    input:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0 30px var(--surface-container) inset;
+        -webkit-text-fill-color: var(--on-surface);
+        border-radius: 0;
+    }
+
+    /* Fix Chrome audio controls */
+    audio::-webkit-media-controls {
+        background-color: var(--surface);
+    }
+}
+
+/* Internet Explorer 11 fixes (legacy support) */
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+    /* Fix IE11 flexbox */
+    .flex-container {
+        display: -ms-flexbox;
+        display: flex;
+    }
+
+    /* Fix IE11 input styling */
+    input[type="search"] {
+        border-radius: 0;
+    }
+
+    /* Fix IE11 audio element */
+    audio {
+        height: 40px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .screen,
+    .modal,
+    .mini-player,
+    .nav-bar {
+        display: none !important;
+    }
+
+    .song-list,
+    .playlist-songs {
+        display: block !important;
+        page-break-inside: avoid;
+    }
+
+    .song-list-item,
+    .playlist-item {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --surface: #1c1b1f;
+        --surface-variant: #49454f;
+        --on-surface: #e6e1e5;
+        --on-surface-variant: #cac4d0;
+        --outline: #938f99;
+        --outline-variant: #c4c7c5;
+    }
+}
+
+/* Light mode support */
+@media (prefers-color-scheme: light) {
+    :root {
+        --surface: #fef7ff;
+        --surface-variant: #f3edf7;
+        --on-surface: #1c1b1f;
+        --on-surface-variant: #49454f;
+        --outline: #79747e;
+        --outline-variant: #c4c7c5;
+    }
+}
+
 /* Legacy responsive rules for existing components */
 @media (max-width: 600px) {
     .welcome-content h1 {

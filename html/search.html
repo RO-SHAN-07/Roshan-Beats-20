@@ -1,67 +1,92 @@
-<div id="search-screen" class="screen">
-    <div class="nav-bar">
-        <button class="nav-btn" id="nav-home-search">🏠 Home</button>
-        <button class="nav-btn active" id="nav-search">🔍 Search</button>
-        <button class="nav-btn" id="nav-notifications">🔔 Notifications</button>
-        <button class="nav-btn" id="nav-chat">💬 Chat</button>
-        <button class="nav-btn" id="nav-gallery">🖼️ Gallery</button>
-        <button class="nav-btn" id="nav-analytics-search">📈 Analytics</button>
-        <button class="nav-btn" id="nav-help-search">❓ Help</button>
-        <button class="nav-btn" id="nav-privacy-search">🔒 Privacy</button>
-        <button class="nav-btn" id="nav-offline-queue-search">📶 Offline Queue</button>
-        <button class="nav-btn" id="nav-ar-camera-search">📷 AR Camera</button>
-        <button class="nav-btn" id="nav-settings-search">⚙️ Settings</button>
-    </div>
-    <h2>Advanced Search</h2>
-    <div class="search-filters">
-        <input type="text" id="advanced-search-input" placeholder="Search songs, artists, albums...">
-        <select id="filter-artist">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6750a4">
+  <title>Roshan Beats - Search</title>
+  <meta name="description" content="Explore search in Roshan Beats, your advanced music player PWA.">
+  <meta name="keywords" content="search, music player, Roshan Beats">
+  <link rel="canonical" href="https://roshanbeats.com/html/search.html">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/themes.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+<div id="search-screen" class="screen" id="main-content">
+    <nav class="nav-bar" aria-label="Main navigation">
+        <button class="nav-btn" id="nav-home-search" aria-label="Home">🏠 Home</button>
+        <button class="nav-btn active" id="nav-search" aria-label="Search">🔍 Search</button>
+        <button class="nav-btn" id="nav-notifications" aria-label="Notifications">🔔 Notifications</button>
+        <button class="nav-btn" id="nav-chat" aria-label="Chat">💬 Chat</button>
+        <button class="nav-btn" id="nav-gallery" aria-label="Gallery">🖼️ Gallery</button>
+        <button class="nav-btn" id="nav-analytics-search" aria-label="Analytics">📈 Analytics</button>
+        <button class="nav-btn" id="nav-help-search" aria-label="Help">❓ Help</button>
+        <button class="nav-btn" id="nav-privacy-search" aria-label="Privacy">🔒 Privacy</button>
+        <button class="nav-btn" id="nav-offline-queue-search" aria-label="Offline Queue">📶 Offline Queue</button>
+        <button class="nav-btn" id="nav-ar-camera-search" aria-label="AR Camera">📷 AR Camera</button>
+        <button class="nav-btn" id="nav-settings-search" aria-label="Settings">⚙️ Settings</button>
+    </nav>
+    <h1>Advanced Search</h1>
+    <div class="search-filters" role="group" aria-label="Search filters">
+        <label for="advanced-search-input" class="sr-only">Search query</label>
+        <input type="text" id="advanced-search-input" placeholder="Search songs, artists, albums..." aria-describedby="search-desc">
+        <div id="search-desc" class="sr-only">Enter keywords to search your music library</div>
+        <label for="filter-artist">Artist:</label>
+        <select id="filter-artist" aria-label="Filter by artist">
             <option value="">All Artists</option>
         </select>
-        <select id="filter-album">
+        <label for="filter-album">Album:</label>
+        <select id="filter-album" aria-label="Filter by album">
             <option value="">All Albums</option>
         </select>
-        <select id="filter-genre">
+        <label for="filter-genre">Genre:</label>
+        <select id="filter-genre" aria-label="Filter by genre">
             <option value="">All Genres</option>
         </select>
-        <input type="number" id="filter-year" placeholder="Year">
-        <button id="apply-filters">Apply Filters</button>
+        <label for="filter-year">Year:</label>
+        <input type="number" id="filter-year" placeholder="Year" aria-label="Filter by year">
+        <button id="apply-filters" aria-label="Apply search filters">Apply Filters</button>
     </div>
     <!-- Error States -->
-    <div class="error-state" id="search-error" style="display: none;">
-        <div class="error-icon">🔍</div>
+    <div class="error-state" id="search-error" role="alert" aria-live="assertive" style="display: none;">
+        <div class="error-icon" aria-hidden="true">🔍</div>
         <h2>Search Unavailable</h2>
         <p id="search-error-message">Unable to perform search</p>
-        <button class="outlined-btn" id="retry-search">Retry</button>
+        <button class="outlined-btn" id="retry-search" aria-label="Retry search">Retry</button>
     </div>
 
     <!-- Loading States -->
-    <div class="loading-state" id="search-loading" style="display: none;">
-        <div class="spinner"></div>
+    <div class="loading-state" id="search-loading" role="status" aria-live="polite" style="display: none;">
+        <div class="spinner" aria-hidden="true"></div>
         <p>Searching...</p>
     </div>
 
     <!-- Empty States -->
     <div class="empty-state" id="search-empty" style="display: none;">
-        <div class="empty-icon">🔍</div>
+        <div class="empty-icon" aria-hidden="true">🔍</div>
         <h2>Start Your Search</h2>
         <p>Enter keywords to find songs in your library</p>
         <div class="empty-actions">
-            <button class="outlined-btn" id="search-examples">View Examples</button>
+            <button class="outlined-btn" id="search-examples" aria-label="View search examples">View Examples</button>
         </div>
     </div>
 
     <div class="empty-state" id="no-search-results" style="display: none;">
-        <div class="empty-icon">📭</div>
+        <div class="empty-icon" aria-hidden="true">📭</div>
         <h2>No results found</h2>
         <p>Try different keywords or check your spelling</p>
         <div class="empty-actions">
-            <button class="outlined-btn" id="clear-search">Clear Search</button>
-            <button class="text-btn" id="search-tips">Search Tips</button>
+            <button class="outlined-btn" id="clear-search" aria-label="Clear search">Clear Search</button>
+            <button class="text-btn" id="search-tips" aria-label="View search tips">Search Tips</button>
         </div>
     </div>
 
-    <div class="search-results" id="search-results">
+    <div class="search-results" id="search-results" role="region" aria-label="Search results" aria-live="polite">
         <!-- Results will be populated here -->
     </div>
 </div>
+</body>
+</html>
