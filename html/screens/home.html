@@ -1,0 +1,126 @@
+<div id="home-screen" class="screen">
+    <header class="screen-header">
+        <h1 class="screen-title">Song Library</h1>
+        <div class="header-actions">
+            <button class="icon-btn" id="view-toggle" aria-label="Toggle view">📱</button>
+        </div>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <div class="search-input-wrapper">
+            <input type="text" id="search-input" placeholder="Search songs, artists, albums..." class="search-input">
+            <button class="search-clear" id="search-clear" aria-label="Clear search">✕</button>
+        </div>
+    </div>
+
+    <!-- Filter Controls -->
+    <div class="filters">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label class="filter-label">Genre:</label>
+                <select id="genre-filter" class="filter-select">
+                    <option value="">All Genres</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Artist:</label>
+                <select id="artist-filter" class="filter-select">
+                    <option value="">All Artists</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Album:</label>
+                <select id="album-filter" class="filter-select">
+                    <option value="">All Albums</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <button class="filter-reset" id="filter-reset">Reset Filters</button>
+        </div>
+    </div>
+    <div class="content-area">
+        <!-- Empty States -->
+        <div class="empty-state" id="empty-state">
+            <div class="empty-icon">🎵</div>
+            <h2>No songs imported</h2>
+            <p>Import your music library to start listening</p>
+            <div class="empty-actions">
+                <button class="elevated-btn" id="import-btn">Import Songs</button>
+                <button class="outlined-btn" id="import-tutorial">How to Import</button>
+            </div>
+        </div>
+
+        <div class="empty-state" id="no-results-state" style="display: none;">
+            <div class="empty-icon">🔍</div>
+            <h2>No songs found</h2>
+            <p>Try different search terms or adjust your filters</p>
+            <div class="empty-actions">
+                <button class="outlined-btn" id="clear-search-filters">Clear Search & Filters</button>
+                <button class="text-btn" id="search-suggestions">View Suggestions</button>
+            </div>
+        </div>
+
+        <!-- Error States -->
+        <div class="error-state" id="network-error-state" style="display: none;">
+            <div class="error-icon">📶</div>
+            <h2>Connection Lost</h2>
+            <p>Unable to sync your music library. Working offline.</p>
+            <button class="outlined-btn" id="retry-network">Retry Connection</button>
+        </div>
+
+        <div class="error-state" id="permission-error-state" style="display: none;">
+            <div class="error-icon">🔒</div>
+            <h2>Storage Access Needed</h2>
+            <p>Grant storage permission to save your music library</p>
+            <div class="error-actions">
+                <button class="elevated-btn" id="grant-storage-permission">Grant Permission</button>
+                <button class="text-btn" id="permission-help">Learn More</button>
+            </div>
+        </div>
+
+        <div class="error-state" id="quota-error-state" style="display: none;">
+            <div class="error-icon">💾</div>
+            <h2>Storage Full</h2>
+            <p>Your storage is almost full. Free up space to continue.</p>
+            <div class="error-actions">
+                <button class="elevated-btn" id="manage-storage">Manage Storage</button>
+                <button class="outlined-btn" id="clear-cache">Clear Cache</button>
+            </div>
+        </div>
+
+        <div class="error-state" id="database-error-state" style="display: none;">
+            <div class="error-icon">💥</div>
+            <h2>Database Error</h2>
+            <p>Unable to access your music library. Attempting to repair...</p>
+            <button class="outlined-btn" id="retry-database">Retry</button>
+        </div>
+
+        <!-- Loading States -->
+        <div class="loading-state" id="loading-state">
+            <div class="spinner"></div>
+            <p id="loading-message">Loading your music library...</p>
+        </div>
+
+        <div class="loading-state" id="sync-loading-state" style="display: none;">
+            <div class="sync-spinner"></div>
+            <p>Syncing changes...</p>
+        </div>
+
+        <!-- Content Areas -->
+        <div class="song-grid" id="song-grid">
+            <!-- Songs will be populated as cards -->
+        </div>
+        <div class="song-list" id="song-list" style="display: none;">
+            <!-- Songs will be populated as list items -->
+        </div>
+
+        <!-- Offline Indicator -->
+        <div class="offline-banner" id="offline-banner" style="display: none;">
+            <span class="offline-icon">📶</span>
+            <span>Working offline - changes will sync when connected</span>
+        </div>
+    </div>
+    <button class="fab" id="fab-import" aria-label="Import songs">+</button>
+</div>

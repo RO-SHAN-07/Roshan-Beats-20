@@ -1,0 +1,86 @@
+<!-- Add to Playlist Modal -->
+<div id="add-to-playlist-modal" class="modal" style="display: none;">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add to Playlist</h2>
+            <button class="close-btn" id="close-add-modal" aria-label="Close">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="playlist-selection" id="playlist-selection">
+                <!-- Playlists will be populated here -->
+            </div>
+            <button class="elevated-btn" id="create-new-playlist">Create New Playlist</button>
+        </div>
+    </div>
+</div>
+
+<!-- Equalizer Settings Modal -->
+<div id="eq-modal" class="modal" style="display: none;">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Equalizer Settings</h2>
+            <button class="close-btn" id="close-eq-modal" aria-label="Close">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="eq-sliders" id="eq-sliders">
+                <!-- EQ sliders will be populated here -->
+            </div>
+            <div class="eq-presets">
+                <button class="eq-preset" data-preset="flat">Flat</button>
+                <button class="eq-preset" data-preset="rock">Rock</button>
+                <button class="eq-preset" data-preset="pop">Pop</button>
+                <button class="eq-preset" data-preset="jazz">Jazz</button>
+                <button class="eq-preset" data-preset="classical">Classical</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Playlist Modal -->
+<div id="create-playlist-modal" class="modal" style="display: none;">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Create New Playlist</h2>
+            <button class="close-btn" id="close-create-modal" aria-label="Close">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="playlist-name">Playlist Name</label>
+                <input type="text" id="playlist-name" placeholder="Enter playlist name">
+            </div>
+            <div class="form-group">
+                <label for="playlist-description">Description (optional)</label>
+                <textarea id="playlist-description" placeholder="Enter description"></textarea>
+            </div>
+            <button class="elevated-btn" id="confirm-create-playlist">Create Playlist</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Playlist Modal -->
+<div id="edit-playlist-modal" class="modal" style="display: none;">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Edit Playlist</h2>
+            <button class="close-btn" id="close-edit-modal" aria-label="Close">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="edit-playlist-name">Playlist Name</label>
+                <input type="text" id="edit-playlist-name" placeholder="Enter playlist name">
+            </div>
+            <div class="form-group">
+                <label for="edit-playlist-description">Description (optional)</label>
+                <textarea id="edit-playlist-description" placeholder="Enter description"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="outlined-btn" id="delete-playlist-btn">Delete Playlist</button>
+                <button class="elevated-btn" id="confirm-edit-playlist">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>

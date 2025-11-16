@@ -1,0 +1,96 @@
+<div id="player-screen" class="screen">
+    <div class="player-background" id="player-background"></div>
+    <div class="theme-switcher">
+        <button class="theme-btn theme-purple-btn" id="theme-purple"></button>
+        <button class="theme-btn theme-ice-btn" id="theme-ice"></button>
+    </div>
+    <div class="player-container">
+        <div class="album-art" id="album-art">
+            <canvas id="visualizer"></canvas>
+        </div>
+        <div class="track-info">
+            <h2 id="track-title">Track Title</h2>
+            <p id="track-artist">Artist</p>
+        </div>
+        <div class="seek-bar" id="seek-bar">
+            <div class="seek-bar-fill" id="seek-fill"></div>
+        </div>
+        <div class="controls">
+            <button class="control-btn" id="shuffle-btn" title="Shuffle">🔀</button>
+            <button class="control-btn" id="prev-btn" title="Previous">⏮</button>
+            <button class="control-btn" id="play-pause-btn" title="Play/Pause">▶</button>
+            <button class="control-btn" id="next-btn" title="Next">⏭</button>
+            <button class="control-btn" id="repeat-btn" title="Repeat">🔁</button>
+        </div>
+        <div class="secondary-controls">
+            <button class="control-btn" id="bookmark-btn" title="Bookmark">❤️</button>
+            <div class="speed-control">
+                <span>Speed:</span>
+                <select id="speed-select">
+                    <option value="0.5">0.5x</option>
+                    <option value="0.75">0.75x</option>
+                    <option value="1" selected>1x</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="2">2x</option>
+                </select>
+            </div>
+        </div>
+        <div class="volume-control">
+            <span>🔊</span>
+            <div class="volume-bar" id="volume-bar">
+                <div class="volume-fill" id="volume-fill"></div>
+            </div>
+            <button id="mute-btn">🔇</button>
+        </div>
+        <div class="eq-controls">
+            <h3>Equalizer</h3>
+            <div id="eq-presets">
+                <button class="eq-preset" data-preset="normal">Normal</button>
+                <button class="eq-preset" data-preset="bass">Bass Boost</button>
+                <button class="eq-preset" data-preset="pop">Pop</button>
+                <button class="eq-preset" data-preset="rock">Rock</button>
+                <button class="eq-preset" data-preset="jazz">Jazz</button>
+                <button class="eq-preset" data-preset="classical">Classical</button>
+            </div>
+        </div>
+        <div class="visualizer-controls">
+            <h3>Visualizer</h3>
+            <div id="visualizer-presets">
+                <button class="eq-preset" data-viz="spectrum">Spectrum</button>
+                <button class="eq-preset" data-viz="waveform">Waveform</button>
+                <button class="eq-preset" data-viz="circular">Circular</button>
+            </div>
+        </div>
+        <button class="queue-toggle" id="queue-toggle" title="Queue">📋</button>
+    </div>
+
+    <!-- Lyrics Panel -->
+    <div class="lyrics-panel" id="lyrics-panel" style="display: none;">
+        <div class="lyrics-header">
+            <h3>Lyrics</h3>
+            <button class="close-btn" id="close-lyrics">✕</button>
+        </div>
+        <div class="lyrics-content" id="lyrics-content">
+            <div class="no-lyrics">No lyrics available</div>
+        </div>
+    </div>
+
+    <!-- Queue Panel -->
+    <div class="queue-panel" id="queue-panel" style="display: none;">
+        <div class="queue-header">
+            <h3>Queue</h3>
+            <button class="queue-clear" id="clear-queue">Clear</button>
+            <button class="close-btn" id="close-queue">✕</button>
+        </div>
+        <div class="queue-list" id="queue-list">
+            <div class="empty-queue">Queue is empty</div>
+        </div>
+    </div>
+
+    <!-- Sleep Timer -->
+    <div class="sleep-timer" id="sleep-timer-display" style="display: none;">
+        <span>Sleep in: </span><span id="sleep-countdown">00:00</span>
+        <button id="cancel-sleep">Cancel</button>
+    </div>
+</div>

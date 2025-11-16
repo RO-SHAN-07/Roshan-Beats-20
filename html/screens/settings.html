@@ -1,0 +1,65 @@
+<div id="settings-screen" class="screen">
+    <header class="screen-header">
+        <h1 class="screen-title">Settings</h1>
+    </header>
+    <div class="content-area">
+        <div class="settings-section">
+            <h2>Theme</h2>
+            <div class="setting-item">
+                <label for="theme-purple">Neon Purple</label>
+                <button class="outlined-btn" id="set-theme-purple">Apply</button>
+            </div>
+            <div class="setting-item">
+                <label for="theme-ice">Glassmorphic Ice</label>
+                <button class="outlined-btn" id="set-theme-ice">Apply</button>
+            </div>
+            <div class="setting-item">
+                <label for="theme-amoled">AMOLED Dark</label>
+                <button class="outlined-btn" id="set-theme-amoled">Apply</button>
+            </div>
+        </div>
+        <div class="settings-section">
+            <h2>Data Management</h2>
+            <div class="setting-item">
+                <label for="import-more">Import More Songs</label>
+                <button class="elevated-btn" id="import-more">Import</button>
+            </div>
+            <div class="setting-item">
+                <label for="clear-data">Clear All Data</label>
+                <button class="outlined-btn danger" id="clear-data">Clear</button>
+            </div>
+        </div>
+        <div class="settings-section">
+            <h2>Playback</h2>
+            <div class="setting-item">
+                <label for="default-volume">Default Volume</label>
+                <input type="range" id="default-volume" min="0" max="1" step="0.1" value="0.7" aria-label="Default volume">
+            </div>
+            <div class="setting-item">
+                <label for="shuffle-on-start">Shuffle on Start</label>
+                <input type="checkbox" id="shuffle-on-start" aria-label="Shuffle on start">
+            </div>
+        </div>
+        <div class="settings-section">
+            <h2>Notifications</h2>
+            <div class="setting-item">
+                <label for="push-notifications">Enable Push Notifications</label>
+                <input type="checkbox" id="push-notifications" checked aria-label="Push notifications">
+            </div>
+            <div class="setting-item">
+                <label for="notification-sound">Notification Sound</label>
+                <select id="notification-sound" aria-label="Notification sound">
+                    <option>Default</option>
+                    <option>None</option>
+                </select>
+            </div>
+        </div>
+        <div class="settings-section">
+            <h2>Privacy</h2>
+            <div class="setting-item">
+                <label for="share-data">Share Listening Data</label>
+                <input type="checkbox" id="share-data" aria-label="Share listening data">
+            </div>
+        </div>
+    </div>
+</div>

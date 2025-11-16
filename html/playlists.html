@@ -1,0 +1,56 @@
+<div id="playlists-screen" class="screen">
+    <div class="nav-bar">
+        <button class="nav-btn" id="nav-home">🏠 Home</button>
+        <button class="nav-btn active" id="nav-playlists">📂 Playlists</button>
+        <button class="nav-btn" id="nav-dashboard4">📊 Dashboard</button>
+        <button class="nav-btn" id="nav-profile4">👤 Profile</button>
+        <button class="nav-btn" id="nav-search4">🔍 Search</button>
+        <button class="nav-btn" id="nav-notifications4">🔔 Notifications</button>
+        <button class="nav-btn" id="nav-chat4">💬 Chat</button>
+        <button class="nav-btn" id="nav-gallery4">🖼️ Gallery</button>
+        <button class="nav-btn" id="nav-analytics4">📈 Analytics</button>
+        <button class="nav-btn" id="nav-help4">❓ Help</button>
+        <button class="nav-btn" id="nav-privacy4">🔒 Privacy</button>
+        <button class="nav-btn" id="nav-offline-queue4">📶 Offline Queue</button>
+        <button class="nav-btn" id="nav-ar-camera4">📷 AR Camera</button>
+        <button class="nav-btn" id="nav-settings">⚙️ Settings</button>
+    </div>
+    <h2>Playlists</h2>
+    <button class="create-playlist" id="create-playlist">Create New Playlist</button>
+
+    <!-- Error States -->
+    <div class="error-state" id="playlists-load-error" style="display: none;">
+        <div class="error-icon">💥</div>
+        <h2>Unable to Load Playlists</h2>
+        <p>Failed to load your playlists. Please try again.</p>
+        <button class="outlined-btn" id="retry-load-playlists">Retry</button>
+    </div>
+
+    <div class="error-state" id="playlist-create-error" style="display: none;">
+        <div class="error-icon">❌</div>
+        <h2>Failed to Create Playlist</h2>
+        <p id="playlist-create-error-message">Unable to create playlist</p>
+        <button class="outlined-btn" id="retry-create-playlist">Try Again</button>
+    </div>
+
+    <!-- Loading States -->
+    <div class="loading-state" id="playlists-loading" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading your playlists...</p>
+    </div>
+
+    <!-- Empty States -->
+    <div class="empty-state" id="playlists-empty" style="display: none;">
+        <div class="empty-icon">📂</div>
+        <h2>No playlists yet</h2>
+        <p>Create playlists to organize your music collection</p>
+        <div class="empty-actions">
+            <button class="elevated-btn" id="create-first-playlist">Create Your First</button>
+            <button class="outlined-btn" id="playlist-tutorial">How to Create</button>
+        </div>
+    </div>
+
+    <div class="playlist-list" id="playlist-list">
+        <!-- Playlists will be populated here -->
+    </div>
+</div>

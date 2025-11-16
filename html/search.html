@@ -1,0 +1,67 @@
+<div id="search-screen" class="screen">
+    <div class="nav-bar">
+        <button class="nav-btn" id="nav-home-search">🏠 Home</button>
+        <button class="nav-btn active" id="nav-search">🔍 Search</button>
+        <button class="nav-btn" id="nav-notifications">🔔 Notifications</button>
+        <button class="nav-btn" id="nav-chat">💬 Chat</button>
+        <button class="nav-btn" id="nav-gallery">🖼️ Gallery</button>
+        <button class="nav-btn" id="nav-analytics-search">📈 Analytics</button>
+        <button class="nav-btn" id="nav-help-search">❓ Help</button>
+        <button class="nav-btn" id="nav-privacy-search">🔒 Privacy</button>
+        <button class="nav-btn" id="nav-offline-queue-search">📶 Offline Queue</button>
+        <button class="nav-btn" id="nav-ar-camera-search">📷 AR Camera</button>
+        <button class="nav-btn" id="nav-settings-search">⚙️ Settings</button>
+    </div>
+    <h2>Advanced Search</h2>
+    <div class="search-filters">
+        <input type="text" id="advanced-search-input" placeholder="Search songs, artists, albums...">
+        <select id="filter-artist">
+            <option value="">All Artists</option>
+        </select>
+        <select id="filter-album">
+            <option value="">All Albums</option>
+        </select>
+        <select id="filter-genre">
+            <option value="">All Genres</option>
+        </select>
+        <input type="number" id="filter-year" placeholder="Year">
+        <button id="apply-filters">Apply Filters</button>
+    </div>
+    <!-- Error States -->
+    <div class="error-state" id="search-error" style="display: none;">
+        <div class="error-icon">🔍</div>
+        <h2>Search Unavailable</h2>
+        <p id="search-error-message">Unable to perform search</p>
+        <button class="outlined-btn" id="retry-search">Retry</button>
+    </div>
+
+    <!-- Loading States -->
+    <div class="loading-state" id="search-loading" style="display: none;">
+        <div class="spinner"></div>
+        <p>Searching...</p>
+    </div>
+
+    <!-- Empty States -->
+    <div class="empty-state" id="search-empty" style="display: none;">
+        <div class="empty-icon">🔍</div>
+        <h2>Start Your Search</h2>
+        <p>Enter keywords to find songs in your library</p>
+        <div class="empty-actions">
+            <button class="outlined-btn" id="search-examples">View Examples</button>
+        </div>
+    </div>
+
+    <div class="empty-state" id="no-search-results" style="display: none;">
+        <div class="empty-icon">📭</div>
+        <h2>No results found</h2>
+        <p>Try different keywords or check your spelling</p>
+        <div class="empty-actions">
+            <button class="outlined-btn" id="clear-search">Clear Search</button>
+            <button class="text-btn" id="search-tips">Search Tips</button>
+        </div>
+    </div>
+
+    <div class="search-results" id="search-results">
+        <!-- Results will be populated here -->
+    </div>
+</div>

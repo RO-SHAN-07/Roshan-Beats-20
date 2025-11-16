@@ -1,0 +1,229 @@
+/* Mobile-First Responsive Design */
+
+/* Extra small devices (phones, 320px and up) */
+@media (min-width: 320px) {
+    .song-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+
+    .bottom-nav {
+        padding: 0.25rem;
+    }
+
+    .nav-item {
+        min-width: 56px;
+        padding: 0.25rem;
+    }
+}
+
+/* Small devices (phones, 576px and up) */
+@media (min-width: 576px) {
+    .song-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+
+    .modal-content {
+        max-width: 500px;
+    }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+    .song-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+
+    .screen {
+        padding: 1.5rem;
+    }
+
+    .content-area {
+        padding: 0 1rem;
+    }
+
+    .bottom-nav {
+        display: none; /* Hide bottom nav on larger screens */
+    }
+
+    .mini-player {
+        bottom: 0; /* No nav to account for */
+    }
+
+    .fab {
+        bottom: 1.5rem;
+    }
+
+    /* Show side navigation or adjust layout for tablets */
+    .screen-header {
+        justify-content: flex-start;
+    }
+
+    .header-actions {
+        margin-left: auto;
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    .song-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+
+    .modal-content {
+        max-width: 600px;
+    }
+
+    .screen {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    .song-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+}
+
+/* Orientation changes */
+@media (orientation: landscape) and (max-height: 500px) {
+    .mini-player {
+        height: 60px;
+        padding: 0.5rem 1rem;
+    }
+
+    .mini-cover {
+        width: 40px;
+        height: 40px;
+    }
+
+    .mini-info h4 {
+        font-size: 0.75rem;
+    }
+
+    .mini-info p {
+        font-size: 0.625rem;
+    }
+
+    .bottom-nav {
+        padding: 0.125rem;
+    }
+
+    .nav-item {
+        min-width: 48px;
+        padding: 0.125rem;
+    }
+
+    .nav-icon {
+        font-size: 1rem;
+    }
+
+    .nav-label {
+        font-size: 0.625rem;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    :root {
+        --outline: var(--on-surface);
+        --outline-variant: var(--on-surface);
+    }
+
+    .btn {
+        border: 2px solid var(--outline);
+    }
+
+    .card {
+        border: 1px solid var(--outline);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Touch targets for accessibility */
+@media (pointer: coarse) {
+    .btn,
+    .icon-btn,
+    .control-btn,
+    .nav-item {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .song-card,
+    .playlist-card,
+    .song-list-item {
+        min-height: 48px;
+    }
+}
+
+/* Legacy responsive rules for existing components */
+@media (max-width: 600px) {
+    .welcome-content h1 {
+        font-size: 2rem;
+    }
+
+    .album-art {
+        width: 200px;
+        height: 200px;
+    }
+
+    .splash-logo h1 {
+        font-size: 2rem;
+    }
+
+    .dashboard-widgets {
+        grid-template-columns: 1fr;
+    }
+
+    .search-filters {
+        flex-direction: column;
+    }
+
+    .chat-input-container {
+        flex-wrap: wrap;
+    }
+
+    .emoji-picker {
+        bottom: 80px;
+    }
+
+    .media-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+
+    .calendar-grid {
+        grid-template-columns: repeat(7, 1fr);
+        font-size: 0.8rem;
+    }
+
+    .map-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .analytics-stats {
+        flex-direction: column;
+    }
+
+    .ar-controls {
+        flex-direction: column;
+        bottom: 80px;
+    }
+}

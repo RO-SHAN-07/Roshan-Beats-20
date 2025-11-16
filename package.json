@@ -1,0 +1,23 @@
+{
+  "name": "roshan-beats-pwa",
+  "version": "1.0.0",
+  "description": "Roshan Beats Progressive Web App",
+  "main": "index.html",
+  "scripts": {
+    "build": "parcel build index.html --dist-dir dist --no-source-maps",
+    "test": "jest",
+    "test:e2e": "jest --testPathPattern=e2e",
+    "deploy": "npm run build && gh-pages -d dist"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "puppeteer": "^21.6.1",
+    "parcel": "^2.10.3",
+    "gh-pages": "^6.0.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"]
+  }
+}

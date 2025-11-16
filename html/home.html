@@ -1,0 +1,80 @@
+<div id="home-screen" class="screen" role="main" aria-labelledby="home-heading">
+    <nav class="nav-bar" role="navigation" aria-label="Main navigation">
+        <button class="nav-btn active" id="nav-home3" aria-label="Home" aria-current="page">
+            <span aria-hidden="true">🏠</span> Home
+        </button>
+        <button class="nav-btn" id="nav-playlists3" aria-label="Playlists">
+            <span aria-hidden="true">📂</span> Playlists
+        </button>
+        <button class="nav-btn" id="nav-dashboard3" aria-label="Dashboard">
+            <span aria-hidden="true">📊</span> Dashboard
+        </button>
+        <button class="nav-btn" id="nav-profile3" aria-label="Profile">
+            <span aria-hidden="true">👤</span> Profile
+        </button>
+        <button class="nav-btn" id="nav-search3" aria-label="Search">
+            <span aria-hidden="true">🔍</span> Search
+        </button>
+        <button class="nav-btn" id="nav-notifications3" aria-label="Notifications">
+            <span aria-hidden="true">🔔</span> Notifications
+        </button>
+        <button class="nav-btn" id="nav-chat3" aria-label="Chat">
+            <span aria-hidden="true">💬</span> Chat
+        </button>
+        <button class="nav-btn" id="nav-gallery3" aria-label="Gallery">
+            <span aria-hidden="true">🖼️</span> Gallery
+        </button>
+        <button class="nav-btn" id="nav-map3" aria-label="Map">
+            <span aria-hidden="true">🗺️</span> Map
+        </button>
+        <button class="nav-btn" id="nav-calendar3" aria-label="Calendar">
+            <span aria-hidden="true">📅</span> Calendar
+        </button>
+        <button class="nav-btn" id="nav-cart3" aria-label="Shopping Cart">
+            <span aria-hidden="true">🛒</span> Cart
+        </button>
+        <button class="nav-btn" id="nav-payment3" aria-label="Payment">
+            <span aria-hidden="true">💳</span> Payment
+        </button>
+        <button class="nav-btn" id="nav-feedback3" aria-label="Feedback">
+            <span aria-hidden="true">⭐</span> Feedback
+        </button>
+        <button class="nav-btn" id="nav-analytics3" aria-label="Analytics">
+            <span aria-hidden="true">📈</span> Analytics
+        </button>
+        <button class="nav-btn" id="nav-help3" aria-label="Help">
+            <span aria-hidden="true">❓</span> Help
+        </button>
+        <button class="nav-btn" id="nav-privacy3" aria-label="Privacy">
+            <span aria-hidden="true">🔒</span> Privacy
+        </button>
+        <button class="nav-btn" id="nav-offline-queue3" aria-label="Offline Queue">
+            <span aria-hidden="true">📶</span> Offline Queue
+        </button>
+        <button class="nav-btn" id="nav-ar-camera3" aria-label="AR Camera">
+            <span aria-hidden="true">📷</span> AR Camera
+        </button>
+        <button class="nav-btn" id="nav-settings3" aria-label="Settings">
+            <span aria-hidden="true">⚙️</span> Settings
+        </button>
+    </nav>
+    <header class="header">
+        <h2 id="home-heading">Home</h2>
+        <label for="search-input" class="sr-only">Search songs</label>
+        <input type="text" id="search-input" class="search-bar" placeholder="Search songs..." aria-describedby="search-help">
+        <div id="search-help" class="sr-only">Type to search your music library</div>
+    </header>
+    <div class="filters" role="group" aria-label="Content filters">
+        <button class="filter-btn active" data-filter="all" aria-pressed="true">All</button>
+        <button class="filter-btn" data-filter="songs" aria-pressed="false">Songs</button>
+        <button class="filter-btn" data-filter="albums" aria-pressed="false">Albums</button>
+        <button class="filter-btn" data-filter="artists" aria-pressed="false">Artists</button>
+        <button class="filter-btn" data-filter="playlists" aria-pressed="false">Playlists</button>
+    </div>
+    <div class="song-list" id="song-list" role="list" aria-label="Song library">
+        <!-- Songs will be populated here -->
+    </div>
+    <button class="fab" id="fab-import" aria-label="Import music files">
+        <span aria-hidden="true">+</span>
+    </button>
+</div>

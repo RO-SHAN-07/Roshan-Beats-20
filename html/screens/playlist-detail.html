@@ -1,0 +1,25 @@
+<div id="playlist-detail-screen" class="screen">
+    <header class="screen-header">
+        <button class="icon-btn back-btn" id="back-btn" aria-label="Back">⬅️</button>
+        <h1 class="screen-title" id="playlist-title">Playlist Name</h1>
+        <button class="icon-btn" id="add-song-btn" aria-label="Add song">➕</button>
+    </header>
+    <div class="content-area">
+        <div class="empty-state" id="playlist-empty">
+            <div class="empty-icon">🎶</div>
+            <h2>No songs in this playlist</h2>
+            <p>Add some songs to start building your playlist</p>
+            <button class="elevated-btn" id="add-first-song">Add Songs</button>
+        </div>
+        <div class="playlist-info">
+            <div class="playlist-cover" id="playlist-cover"></div>
+            <div class="playlist-meta">
+                <p id="playlist-description">Description</p>
+                <p id="song-count">0 songs</p>
+            </div>
+        </div>
+        <div class="song-list sortable-list" id="playlist-songs">
+            <!-- Songs in playlist will be populated with drag handles -->
+        </div>
+    </div>
+</div>

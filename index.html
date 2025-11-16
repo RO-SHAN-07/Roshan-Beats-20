@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6750a4">
+    <link rel="manifest" href="manifest.json">
+    <title>Roshan Beats</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <!-- Audio element for playback -->
+    <audio id="audio" preload="metadata"></audio>
+
+    <!-- Visualizer canvas -->
+    <canvas id="visualizer" width="250" height="250" style="display: none;"></canvas>
+
+    <!-- Main app container -->
+    <div id="app-container">
+        <!-- Screens will be dynamically loaded here -->
+    </div>
+
+    <!-- Persistent components -->
+    <!-- Mini player and navigation are loaded via JavaScript -->
+
+    <!-- Fuse.js for search functionality -->
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
+
+    <!-- Service Worker -->
+    <script src="sw.js"></script>
+
+    <!-- Module scripts -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<div id="player-screen" class="screen">
+    <div class="player-background" id="player-background"></div>
+    <div class="theme-switcher">
+        <button class="theme-btn theme-purple-btn" id="theme-purple" aria-label="Purple theme"></button>
+        <button class="theme-btn theme-ice-btn" id="theme-ice" aria-label="Ice theme"></button>
+    </div>
+    <div class="player-container">
+        <!-- Error States -->
+        <div class="error-state" id="audio-context-error" style="display: none;">
+            <div class="error-icon">🔇</div>
+            <h2>Audio Suspended</h2>
+            <p>Click to resume audio playback</p>
+            <button class="elevated-btn" id="resume-audio">Resume Audio</button>
+        </div>
+
+        <div class="error-state" id="file-corruption-error" style="display: none;">
+            <div class="error-icon">💥</div>
+            <h2>File Error</h2>
+            <p id="file-error-message">Unable to play this file</p>
+            <div class="error-actions">
+                <button class="outlined-btn" id="skip-song">Skip Song</button>
+                <button class="text-btn" id="report-issue">Report Issue</button>
+            </div>
+        </div>
+
+        <div class="error-state" id="network-playback-error" style="display: none;">
+            <div class="error-icon">📶</div>
+            <h2>Playback Error</h2>
+            <p>Unable to stream audio. Check your connection.</p>
+            <button class="outlined-btn" id="retry-playback">Retry</button>
+        </div>
+
+        <!-- Main Player Content -->
+        <div class="player-content" id="player-content">
+            <div class="album-art" id="album-art">
+                <canvas id="visualizer" aria-label="Audio visualizer"></canvas>
+                <div class="loading-overlay" id="album-art-loading" style="display: none;">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+            <div class="track-info">
+                <h2 id="track-title">Track Title</h2>
+                <p id="track-artist">Artist</p>
+                <div class="track-meta">
+                    <span id="track-album" class="track-album"></span>
+                    <span id="track-year" class="track-year"></span>
+                </div>
+            </div>
+            <div class="seek-bar" id="seek-bar" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="seek-bar-fill" id="seek-fill"></div>
+                <div class="seek-tooltip" id="seek-tooltip" style="display: none;"></div>
+            </div>
+            <div class="time-display">
+                <span id="current-time">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+            <div class="controls">
+                <button class="control-btn" id="shuffle-btn" aria-label="Shuffle">🔀</button>
+                <button class="control-btn" id="prev-btn" aria-label="Previous">⏮</button>
+                <button class="control-btn" id="play-pause-btn" aria-label="Play/Pause">▶</button>
+                <button class="control-btn" id="next-btn" aria-label="Next">⏭</button>
+                <button class="control-btn" id="repeat-btn" aria-label="Repeat">🔁</button>
+            </div>
+            <div class="volume-control">
+                <span>🔊</span>
+                <div class="volume-bar" id="volume-bar" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70">
+                    <div class="volume-fill" id="volume-fill"></div>
+                </div>
+                <button id="mute-btn" aria-label="Mute">🔇</button>
+            </div>
+            <div class="eq-controls">
+                <h3>Equalizer</h3>
+                <div id="eq-sliders">
+                    <div class="eq-slider">
+                        <label>60Hz</label>
+                        <input type="range" min="-20" max="20" value="0" class="eq-band" data-band="0">
+                    </div>
+                    <div class="eq-slider">
+                        <label>250Hz</label>
+                        <input type="range" min="-20" max="20" value="0" class="eq-band" data-band="1">
+                    </div>
+                    <div class="eq-slider">
+                        <label>1kHz</label>
+                        <input type="range" min="-20" max="20" value="0" class="eq-band" data-band="2">
+                    </div>
+                    <div class="eq-slider">
+                        <label>4kHz</label>
+                        <input type="range" min="-20" max="20" value="0" class="eq-band" data-band="3">
+                    </div>
+                    <div class="eq-slider">
+                        <label>16kHz</label>
+                        <input type="range" min="-20" max="20" value="0" class="eq-band" data-band="4">
+                    </div>
+                </div>
+                <div id="eq-presets">
+                    <button class="eq-preset" data-preset="flat">Flat</button>
+                    <button class="eq-preset" data-preset="rock">Rock</button>
+                    <button class="eq-preset" data-preset="pop">Pop</button>
+                    <button class="eq-preset" data-preset="jazz">Jazz</button>
+                    <button class="eq-preset" data-preset="classical">Classical</button>
+                </div>
+            </div>
+            <div class="visualizer-controls">
+                <h3>Visualizer</h3>
+                <div id="visualizer-presets">
+                    <button class="viz-preset" data-viz="spectrum">Spectrum</button>
+                    <button class="viz-preset" data-viz="waveform">Waveform</button>
+                    <button class="viz-preset" data-viz="circular">Circular</button>
+                </div>
+            </div>
+            <div class="lyrics-section" id="lyrics-section" style="display: none;">
+                <h3>Lyrics</h3>
+                <div class="lyrics-content" id="lyrics-content">
+                    <div class="no-lyrics">No lyrics available</div>
+                </div>
+                <button class="text-btn" id="add-lyrics-manually">Add Lyrics Manually</button>
+            </div>
+            <button class="queue-toggle" id="queue-toggle" aria-label="Toggle queue">📋</button>
+        </div>
+
+        <!-- Empty States -->
+        <div class="empty-state" id="player-empty" style="display: none;">
+            <div class="empty-icon">🎵</div>
+            <h2>No song selected</h2>
+            <p>Choose a song from your library to start playing</p>
+            <button class="elevated-btn" id="go-to-library">Go to Library</button>
+        </div>
+
+        <div class="empty-state" id="lyrics-empty" style="display: none;">
+            <div class="empty-icon">📝</div>
+            <h2>No lyrics found</h2>
+            <p>Lyrics are not available for this song</p>
+            <div class="empty-actions">
+                <button class="outlined-btn" id="search-lyrics">Search Online</button>
+                <button class="text-btn" id="add-lyrics-manually">Add Manually</button>
+            </div>
+        </div>
+
+        <!-- Loading States -->
+        <div class="loading-state" id="player-loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading song...</p>
+        </div>
+    </div>
+</div>

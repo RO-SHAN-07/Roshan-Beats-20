@@ -1,0 +1,23 @@
+<div id="mini-player" class="mini-player" style="display: none;">
+    <!-- Error State -->
+    <div class="error-state" id="mini-player-error" style="display: none;">
+        <div class="error-icon">⚠️</div>
+        <span id="mini-error-message">Playback error</span>
+        <button class="text-btn" id="mini-retry">Retry</button>
+    </div>
+
+    <!-- Normal State -->
+    <div class="mini-player-content" id="mini-player-content">
+        <div class="mini-cover" id="mini-cover"></div>
+        <div class="mini-info">
+            <h4 id="mini-title">Track Title</h4>
+            <p id="mini-artist">Artist</p>
+        </div>
+        <div class="mini-controls">
+            <button class="control-btn" id="mini-prev" aria-label="Previous track">⏮</button>
+            <button class="control-btn" id="mini-play-pause" aria-label="Play/Pause">▶</button>
+            <button class="control-btn" id="mini-next" aria-label="Next track">⏭</button>
+        </div>
+        <button class="expand-btn" id="expand-player" aria-label="Expand to full player">⬆️</button>
+    </div>
+</div>

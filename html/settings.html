@@ -1,0 +1,150 @@
+<div id="settings-screen" class="screen">
+    <div class="nav-bar">
+        <button class="nav-btn" id="nav-home2">🏠 Home</button>
+        <button class="nav-btn" id="nav-playlists2">📂 Playlists</button>
+        <button class="nav-btn" id="nav-dashboard6">📊 Dashboard</button>
+        <button class="nav-btn" id="nav-profile6">👤 Profile</button>
+        <button class="nav-btn" id="nav-search6">🔍 Search</button>
+        <button class="nav-btn" id="nav-notifications6">🔔 Notifications</button>
+        <button class="nav-btn" id="nav-chat6">💬 Chat</button>
+        <button class="nav-btn" id="nav-gallery6">🖼️ Gallery</button>
+        <button class="nav-btn" id="nav-analytics6">📈 Analytics</button>
+        <button class="nav-btn" id="nav-help6">❓ Help</button>
+        <button class="nav-btn" id="nav-privacy6">🔒 Privacy</button>
+        <button class="nav-btn" id="nav-offline-queue6">📶 Offline Queue</button>
+        <button class="nav-btn" id="nav-ar-camera6">📷 AR Camera</button>
+        <button class="nav-btn active" id="nav-settings2">⚙️ Settings</button>
+    </div>
+    <h2>Settings</h2>
+
+    <!-- Error States -->
+    <div class="error-state" id="settings-load-error" style="display: none;">
+        <div class="error-icon">⚙️</div>
+        <h2>Unable to Load Settings</h2>
+        <p>Failed to load your preferences. Using defaults.</p>
+        <button class="outlined-btn" id="retry-load-settings">Retry</button>
+    </div>
+
+    <div class="error-state" id="settings-save-error" style="display: none;">
+        <div class="error-icon">💾</div>
+        <h2>Failed to Save Settings</h2>
+        <p id="settings-save-error-message">Unable to save your preferences</p>
+        <button class="outlined-btn" id="retry-save-settings">Retry</button>
+    </div>
+
+    <!-- Loading States -->
+    <div class="loading-state" id="settings-loading" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading settings...</p>
+    </div>
+
+    <div class="settings-section">
+        <h3>Theme</h3>
+        <div class="setting-item">
+            <label>Neon Purple</label>
+            <button id="set-theme-purple">Apply</button>
+        </div>
+        <div class="setting-item">
+            <label>Glassmorphic Ice</label>
+            <button id="set-theme-ice">Apply</button>
+        </div>
+        <div class="setting-item">
+            <label>AMOLED Dark</label>
+            <button id="set-theme-amoled">Apply</button>
+        </div>
+    </div>
+    <div class="settings-section">
+        <h3>Data Management</h3>
+        <div class="setting-item">
+            <label>Import More Songs</label>
+            <button id="import-more">Import</button>
+        </div>
+        <div class="setting-item">
+            <label>Clear All Data</label>
+            <button id="clear-data">Clear</button>
+        </div>
+    </div>
+    <div class="settings-section">
+        <h3>Playback</h3>
+        <div class="setting-item">
+            <label>Default Volume</label>
+            <input type="range" id="default-volume" min="0" max="1" step="0.1" value="0.7">
+        </div>
+        <div class="setting-item">
+            <label>Shuffle on Start</label>
+            <input type="checkbox" id="shuffle-on-start">
+        </div>
+        <div class="setting-item">
+            <label>Repeat Mode</label>
+            <select id="repeat-mode">
+                <option value="off">Off</option>
+                <option value="one">One</option>
+                <option value="all">All</option>
+            </select>
+        </div>
+        <div class="setting-item">
+            <label>Crossfade Duration (seconds)</label>
+            <input type="range" id="crossfade-duration" min="0" max="10" step="0.5" value="3">
+        </div>
+        <div class="setting-item">
+            <label>Enable Crossfade</label>
+            <input type="checkbox" id="crossfade-enabled">
+        </div>
+        <div class="setting-item">
+            <label>Fade-in Duration (seconds)</label>
+            <input type="range" id="fadein-duration" min="0" max="5" step="0.5" value="1">
+        </div>
+        <div class="setting-item">
+            <label>Enable Fade-in</label>
+            <input type="checkbox" id="fadein-enabled" checked>
+        </div>
+        <div class="setting-item">
+            <label>Audio Normalization</label>
+            <input type="checkbox" id="normalization-enabled">
+        </div>
+        <div class="setting-item">
+            <label>Pitch Shift (semitones)</label>
+            <input type="range" id="pitch-shift" min="-12" max="12" step="1" value="0">
+        </div>
+        <div class="setting-item">
+            <label>Tempo Shift (%)</label>
+            <input type="range" id="tempo-shift" min="-50" max="50" step="5" value="0">
+        </div>
+        <div class="setting-item">
+            <label>Auto-play Similar Songs</label>
+            <input type="checkbox" id="autoplay-similar">
+        </div>
+        <div class="setting-item">
+            <label>Sleep Timer (minutes)</label>
+            <select id="sleep-timer-duration">
+                <option value="0">Off</option>
+                <option value="15">15 min</option>
+                <option value="30">30 min</option>
+                <option value="45">45 min</option>
+                <option value="60">1 hour</option>
+                <option value="120">2 hours</option>
+            </select>
+        </div>
+    </div>
+    <div class="settings-section">
+        <h3>Notifications</h3>
+        <div class="setting-item">
+            <label>Enable Push Notifications</label>
+            <input type="checkbox" id="push-notifications" checked>
+        </div>
+        <div class="setting-item">
+            <label>Notification Sound</label>
+            <select id="notification-sound">
+                <option>Default</option>
+                <option>None</option>
+            </select>
+        </div>
+    </div>
+    <div class="settings-section">
+        <h3>Privacy</h3>
+        <div class="setting-item">
+            <label>Share Listening Data</label>
+            <input type="checkbox" id="share-data">
+        </div>
+    </div>
+</div>
