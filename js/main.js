@@ -77,16 +77,48 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (networkDetector.isSlowConnection()) {
     // On slow networks, lazy load when needed
     logger.info('Slow network: lazy loading audio and search modules');
-    audioPromise = import('./modules/audio.js').then(module => module.initAudio());
+    audioPromise = import('./modules/audio.js').then(module => {
+      console.log('DEBUG: audio module imported, initAudio exists:', typeof module.initAudio);
+      if (typeof module.initAudio !== 'function') {
+        throw new Error('initAudio is not a function in audio module');
+      }
+      return module.initAudio();
+    }).catch(error => {
+      logger.error('Failed to import audio module', error);
+      return null;
+    });
     searchPromise = import('./modules/search.js').then(module => {
+      console.log('DEBUG: search module imported, searchManager exists:', typeof module.searchManager);
+      if (!module.searchManager) {
+        throw new Error('searchManager is undefined in search module');
+      }
       return module.searchManager;
+    }).catch(error => {
+      logger.error('Failed to import search module', error);
+      return null;
     });
   } else {
     // On fast networks, preload immediately
     logger.info('Fast network: preloading audio and search modules');
-    audioPromise = import('./modules/audio.js').then(module => module.initAudio());
+    audioPromise = import('./modules/audio.js').then(module => {
+      console.log('DEBUG: audio module imported, initAudio exists:', typeof module.initAudio);
+      if (typeof module.initAudio !== 'function') {
+        throw new Error('initAudio is not a function in audio module');
+      }
+      return module.initAudio();
+    }).catch(error => {
+      logger.error('Failed to import audio module', error);
+      return null;
+    });
     searchPromise = import('./modules/search.js').then(module => {
+      console.log('DEBUG: search module imported, searchManager exists:', typeof module.searchManager);
+      if (!module.searchManager) {
+        throw new Error('searchManager is undefined in search module');
+      }
       return module.searchManager;
+    }).catch(error => {
+      logger.error('Failed to import search module', error);
+      return null;
     });
     // Start preloading in background
     Promise.all([audioPromise, searchPromise]).catch(error => {

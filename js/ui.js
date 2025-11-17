@@ -1,39 +1,9 @@
 // Screen switching, event listeners, dynamic updates
 import { logger } from './modules/logger.js';
+import { showScreen } from './ui-manager.js';
+import { songs, playlists, openDB, updateSongList, updatePlaylistList, playSong, updateMiniPlayer, updatePlayPauseBtn, initVisualizer, updateQueue, saveSong, generateCover } from './audio.js';
+import { loadUser, saveUser } from './storage.js';
 
-// Navigation
-function showScreen(screenId) {
-  logger.debug('Switching to screen', { screenId });
-
-  const startTime = performance.now();
-  document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
-  document.getElementById(screenId).classList.add('active');
-
-  // Update nav active states
-  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-  if (screenId === 'home-screen') {
-    document.querySelectorAll('.nav-btn[id*="nav-home"]').forEach(btn => btn.classList.add('active'));
-  } else if (screenId === 'playlists-screen') {
-    document.querySelectorAll('.nav-btn[id*="nav-playlists"]').forEach(btn => btn.classList.add('active'));
-  } else if (screenId === 'settings-screen') {
-    document.querySelectorAll('.nav-btn[id*="nav-settings"]').forEach(btn => btn.classList.add('active'));
-  } else if (screenId === 'search-screen') {
-    document.querySelectorAll('.nav-btn[id*="nav-search"]').forEach(btn => btn.classList.add('active'));
-  } else if (screenId === 'notifications-screen') {
-    document.querySelectorAll('.nav-btn[id*="nav-notifications"]').forEach(btn => btn.classList.add('active'));
-  } else if (screenId === 'chat-screen') {
-    document.querySelectorAll('.nav-btn[id*="nav-chat"]').forEach(btn => btn.classList.add('active'));
-  } else if (screenId === 'gallery-screen') {
-    document.querySelectorAll('.nav-btn[id*="nav-gallery"]').forEach(btn => btn.classList.add('active'));
-  } else if (screenId === 'dashboard-screen') {
-    document.querySelectorAll('.nav-btn[id*="nav-dashboard"]').forEach(btn => btn.classList.add('active'));
-  } else if (screenId === 'profile-screen') {
-    document.querySelectorAll('.nav-btn[id*="nav-profile"]').forEach(btn => btn.classList.add('active'));
-  }
-
-  const switchTime = performance.now() - startTime;
-  logger.info('Screen switched successfully', { screenId, switchTime: `${switchTime.toFixed(2)}ms` });
-}
 
 // Search
 document.querySelector('.search-bar').addEventListener('input', (e) => {
@@ -43,6 +13,10 @@ document.querySelector('.search-bar').addEventListener('input', (e) => {
 });
 
 function filterSongs(query) {
+  if (!songs) {
+    logger.warn('Songs not loaded yet');
+    return;
+  }
   logger.debug('Filtering songs', { query, totalSongs: songs.length });
   const startTime = performance.now();
 
@@ -80,7 +54,7 @@ function filterSongs(query) {
             `;
       item.addEventListener('click', () => {
         logger.debug('Song selected from search results', { title: song.title, artist: song.artist });
-        playSong(songs.indexOf(song));
+        if (typeof playSong === 'function') playSong(songs.indexOf(song));
       });
       songList.appendChild(item);
     });
@@ -137,7 +111,7 @@ document.getElementById('nav-profile3').addEventListener('click', () => {
 });
 document.getElementById('nav-map3').addEventListener('click', () => {
   showScreen('map-screen');
-  initMap();
+  if (typeof initMap === 'function') initMap();
 });
 document.getElementById('nav-calendar3').addEventListener('click', () => {
   showScreen('calendar-screen');
@@ -177,6 +151,7 @@ document.getElementById('nav-profile6').addEventListener('click', () => {
 
 // Settings
 document.getElementById('set-theme-purple').addEventListener('click', () => {
+  console.log('DEBUG: set-theme-purple clicked, currentTheme:', currentTheme);
   logger.info('Theme changed to purple', { previousTheme: currentTheme });
   document.body.className = 'theme-purple';
   currentTheme = 'purple';
@@ -199,6 +174,7 @@ document.getElementById('import-more').addEventListener('click', () => {
 });
 
 document.getElementById('clear-data').addEventListener('click', async () => {
+  console.log('DEBUG: clear-data clicked, checking functions: openDB exists:', typeof openDB, 'updateSongList exists:', typeof updateSongList, 'updatePlaylistList exists:', typeof updatePlaylistList, 'showScreen exists:', typeof showScreen);
   logger.warn('Clear data button clicked - user prompted for confirmation');
 
   if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
@@ -213,9 +189,9 @@ document.getElementById('clear-data').addEventListener('click', async () => {
 
       songs = [];
       playlists = [];
-      updateSongList();
-      updatePlaylistList();
-      showScreen('welcome-screen');
+      if (typeof updateSongList === 'function') updateSongList();
+      if (typeof updatePlaylistList === 'function') updatePlaylistList();
+      if (typeof showScreen === 'function') showScreen('welcome-screen');
 
       logger.info('All data cleared successfully');
     } catch (error) {
@@ -307,7 +283,9 @@ document.getElementById('profile-form').addEventListener('submit', async (e) => 
 
 document.getElementById('change-pic').addEventListener('click', () => {
   // Simulate change pic
-  document.getElementById('profile-pic').src = generateCover();
+  if (typeof generateCover === 'function') {
+    document.getElementById('profile-pic').src = generateCover();
+  }
 });
 
 // Navigation for new screens
@@ -340,15 +318,15 @@ document.querySelectorAll('[id*="nav-chat"]').forEach(btn => btn.addEventListene
 document.querySelectorAll('[id*="nav-gallery"]').forEach(btn => btn.addEventListener('click', () => showScreen('gallery-screen')));
 document.querySelectorAll('[id*="nav-map"]').forEach(btn => btn.addEventListener('click', () => {
   showScreen('map-screen');
-  initMap();
+  if (typeof initMap === 'function') initMap();
 }));
 document.querySelectorAll('[id*="nav-calendar"]').forEach(btn => btn.addEventListener('click', () => {
   showScreen('calendar-screen');
-  renderCalendar();
+  if (typeof renderCalendar === 'function') renderCalendar();
 }));
 document.querySelectorAll('[id*="nav-cart"]').forEach(btn => btn.addEventListener('click', () => {
   showScreen('cart-screen');
-  updateCartDisplay();
+  if (typeof updateCartDisplay === 'function') updateCartDisplay();
 }));
 document.querySelectorAll('[id*="nav-payment"]').forEach(btn => btn.addEventListener('click', () => showScreen('payment-screen')));
 document.querySelectorAll('[id*="nav-feedback"]').forEach(btn => btn.addEventListener('click', () => showScreen('feedback-screen')));
@@ -356,31 +334,41 @@ document.querySelectorAll('[id*="nav-feedback"]').forEach(btn => btn.addEventLis
 // New nav buttons
 document.querySelectorAll('[id*="nav-analytics"]').forEach(btn => btn.addEventListener('click', () => {
   showScreen('analytics-screen');
-  drawAnalyticsChart();
-  updateAnalyticsStats();
+  if (typeof drawAnalyticsChart === 'function') drawAnalyticsChart();
+  if (typeof updateAnalyticsStats === 'function') updateAnalyticsStats();
 }));
 document.querySelectorAll('[id*="nav-help"]').forEach(btn => btn.addEventListener('click', () => showScreen('help-screen')));
 document.querySelectorAll('[id*="nav-privacy"]').forEach(btn => btn.addEventListener('click', () => {
   showScreen('privacy-screen');
-  loadPrivacySettings();
+  if (typeof loadPrivacySettings === 'function') loadPrivacySettings();
 }));
 document.querySelectorAll('[id*="nav-offline-queue"]').forEach(btn => btn.addEventListener('click', () => {
   showScreen('offline-queue-screen');
-  updateOfflineQueue();
+  if (typeof updateOfflineQueue === 'function') updateOfflineQueue();
 }));
 document.querySelectorAll('[id*="nav-ar-camera"]').forEach(btn => btn.addEventListener('click', () => showScreen('ar-camera-screen')));
 
 // Other events
-document.getElementById('save-privacy').addEventListener('click', savePrivacySettings);
+document.getElementById('save-privacy').addEventListener('click', () => {
+  if (typeof savePrivacySettings === 'function') savePrivacySettings();
+});
 document.getElementById('sync-now').addEventListener('click', () => {
   alert('Syncing... (simulated)');
   offlineQueue = [];
-  updateOfflineQueue();
+  if (typeof updateOfflineQueue === 'function') updateOfflineQueue();
 });
-document.getElementById('start-ar').addEventListener('click', startAR);
-document.getElementById('stop-ar').addEventListener('click', stopAR);
-document.getElementById('add-overlay').addEventListener('click', addOverlay);
-document.getElementById('capture-ar').addEventListener('click', captureARPhoto);
+document.getElementById('start-ar').addEventListener('click', () => {
+  if (typeof startAR === 'function') startAR();
+});
+document.getElementById('stop-ar').addEventListener('click', () => {
+  if (typeof stopAR === 'function') stopAR();
+});
+document.getElementById('add-overlay').addEventListener('click', () => {
+  if (typeof addOverlay === 'function') addOverlay();
+});
+document.getElementById('capture-ar').addEventListener('click', () => {
+  if (typeof captureARPhoto === 'function') captureARPhoto();
+});
 
 // Update showScreen for new nav
 const originalShowScreen = showScreen;

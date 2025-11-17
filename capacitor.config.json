@@ -10,7 +10,10 @@
     "@capacitor/geolocation": {},
     "@capacitor/push-notifications": {},
     "@capacitor/biometric": {},
-    "@capacitor/filesystem": {}
+    "@capacitor/filesystem": {},
+    "@capacitor/haptics": {},
+    "@capacitor/app": {},
+    "@capacitor/device": {}
   },
   "android": {
     "allowMixedContent": true,

@@ -1,5 +1,6 @@
 // Audio handling, playback, visualizer, equalizer
 import { logger } from './modules/logger.js';
+import { showScreen } from './ui-manager.js';
 
 const audio = document.getElementById('audio');
 const visualizer = document.getElementById('visualizer');
@@ -249,7 +250,7 @@ document.getElementById('file-input').addEventListener('change', async (e) => {
   updateSongList();
 
   if (songs.length > 0) {
-    showScreen('home-screen');
+    if (typeof showScreen === 'function') showScreen('home-screen');
   }
 
   if (imported > 0) {
@@ -295,6 +296,7 @@ function updateSongList() {
 
 // Play song
 function playSong(index) {
+  console.log('DEBUG: playSong called with index:', index, 'songs exists:', typeof songs, 'songs length:', songs?.length, 'updateMiniPlayer exists:', typeof updateMiniPlayer, 'showScreen exists:', typeof showScreen, 'updatePlayPauseBtn exists:', typeof updatePlayPauseBtn, 'initVisualizer exists:', typeof initVisualizer, 'updateQueue exists:', typeof updateQueue);
   logger.info('Playing song', { index, songCount: songs.length });
   currentSongIndex = index;
   const song = songs[index];
@@ -312,8 +314,8 @@ function playSong(index) {
   document.getElementById('album-art').style.backgroundImage = `url(${song.cover})`;
   document.getElementById('player-background').style.backgroundImage = `url(${song.cover})`;
 
-  updateMiniPlayer();
-  showScreen('player-screen');
+  if (typeof updateMiniPlayer === 'function') updateMiniPlayer();
+  if (typeof showScreen === 'function') showScreen('player-screen');
 
   logger.debug('Starting audio playback');
   audio.play().then(() => {
@@ -323,9 +325,9 @@ function playSong(index) {
   });
 
   isPlaying = true;
-  updatePlayPauseBtn();
-  initVisualizer();
-  updateQueue();
+  if (typeof updatePlayPauseBtn === 'function') updatePlayPauseBtn();
+  if (typeof initVisualizer === 'function') initVisualizer();
+  if (typeof updateQueue === 'function') updateQueue();
 }
 
 function updateQueue() {
@@ -688,3 +690,6 @@ document.getElementById('visualizer-presets').addEventListener('click', (e) => {
     visualizerType = newType;
   }
 });
+
+// Export necessary functions and variables
+export { songs, playlists, openDB, updateSongList, updatePlaylistList, playSong, updateMiniPlayer, updatePlayPauseBtn, initVisualizer, updateQueue, saveSong, generateCover };

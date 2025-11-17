@@ -16,9 +16,6 @@ import {
   getCurrentSong, getCurrentTime, getDuration, on,
 } from './audio.js';
 import { performanceMonitor } from './performance-monitor.js';
-import { Haptics } from '@capacitor/haptics';
-import { App } from '@capacitor/app';
-import { Device } from '@capacitor/device';
 
 class UIManager {
   constructor() {
@@ -311,6 +308,7 @@ class UIManager {
 
     // Handle Android back button using Capacitor App plugin
     try {
+      const { App } = await import('@capacitor/app');
       await App.addListener('backButton', ({ canGoBack }) => {
         if (canGoBack) {
           this.goBack();
@@ -331,11 +329,22 @@ class UIManager {
 
     // Get device info for hardware capabilities
     try {
+      const { Device } = await import('@capacitor/device');
       const deviceInfo = await Device.getInfo();
       this.deviceInfo = deviceInfo;
       logger.info('Device info loaded', deviceInfo);
     } catch (error) {
-      logger.warn('Failed to get device info', error);
+      logger.warn('Failed to get device info, using fallback', error);
+      // Fallback device info
+      this.deviceInfo = {
+        platform: 'web',
+        model: 'Unknown',
+        operatingSystem: 'Unknown',
+        osVersion: 'Unknown',
+        manufacturer: 'Unknown',
+        isVirtual: false,
+        webViewVersion: navigator.userAgent,
+      };
     }
   }
 
@@ -2138,6 +2147,7 @@ class UIManager {
 
   async vibrate(pattern = [50]) {
     try {
+      const { Haptics } = await import('@capacitor/haptics');
       await Haptics.vibrate({ duration: pattern[0] || 50 });
     } catch (error) {
       // Fallback to navigator.vibrate if Capacitor not available

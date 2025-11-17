@@ -167,3 +167,6 @@ async function loadUser() {
     throw error;
   }
 }
+
+// Export functions
+export { openDB, loadData, saveSong, savePlaylist, saveUser, loadUser };
